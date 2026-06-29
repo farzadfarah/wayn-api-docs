@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Provider } from "@/app/provider";
 import "./globals.css";
+import "fumadocs-ui/style.css";
 
 export const metadata: Metadata = {
-  title: "WAYN API Documentation",
+  title: "7x Developer Portal & API Documentation",
   description:
-    "Developer documentation for the WAYN API: authentication, verification, reach, notifications, and OpenAPI reference.",
+    "Developer documentation and API specifications powered by 7x.",
 };
 
 export default function RootLayout({
@@ -14,7 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Provider>{children}</Provider>
+      </body>
     </html>
   );
 }

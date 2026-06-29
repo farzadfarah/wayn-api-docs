@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Code2, BookOpen, Layers, ChevronDown } from "lucide-react";
+import { Code2, BookOpen, Layers, ChevronDown, Search } from "lucide-react";
+import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -26,12 +27,10 @@ export function NavbarClient({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setOpenSearch } = useSearchContext();
 
   const isHub = pathname === "/";
-  const displayTitle = isHub ? "7x" : title;
-  const displayLogoUrl = isHub
-    ? "https://stapps.blob.core.windows.net/cn-epgcms-stg/assets/logo_trademark_72e0639f5d.svg"
-    : logoUrl;
+  const mainLogoUrl = "https://stapps.blob.core.windows.net/cn-epgcms-stg/assets/logo_trademark_72e0639f5d.svg";
 
   const activeDocId = docId || searchParams.get("doc") || docList[0]?.id || "wayn-1";
   const docQuery = `?doc=${activeDocId}`;
@@ -47,27 +46,42 @@ export function NavbarClient({
 
   return (
     <header className="sticky top-0 z-40 bg-blue-600 dark:bg-slate-900 border-b border-blue-700 dark:border-slate-800 text-white shadow-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <MobileNav title={displayTitle} />
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <MobileNav title={isHub ? "7x" : title} />
         
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 font-bold text-white hover:opacity-90 transition-opacity">
-          {displayLogoUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={displayLogoUrl} alt={displayTitle} className="h-7 w-auto object-contain bg-white/10 p-1 rounded" />
-          ) : (
-            <span className="grid h-7 w-7 place-items-center rounded bg-white/20 font-mono text-xs font-black tracking-wider text-white">
-              {displayTitle.slice(0, 3).toUpperCase()}
-            </span>
-          )}
-          <span className="truncate text-base font-bold tracking-tight">{displayTitle}</span>
+        {/* Main Brand: 7x */}
+        <Link href="/" className="flex shrink-0 items-center font-bold text-white hover:opacity-90 transition-opacity" title="7x">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={mainLogoUrl} alt="7x" className="h-7 w-auto object-contain bg-white/10 p-1 rounded" />
         </Link>
 
+        {/* Loaded Documentation Brand Logo */}
+        {!isHub && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-white/40 font-light text-sm select-none">/</span>
+            <Link
+              href={`/docs/overview${docQuery}`}
+              className="flex items-center font-semibold text-white hover:opacity-90 transition-opacity"
+              title={`${title} (v${version})`}
+            >
+              {logoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={logoUrl} alt={title} className="h-7 w-auto object-contain bg-white/10 p-1 rounded" />
+              ) : (
+                <div className="flex h-7 w-7 items-center justify-center rounded bg-white/10 p-1">
+                  <BookOpen className="h-4 w-4 text-white" />
+                </div>
+              )}
+            </Link>
+          </div>
+        )}
+
         {docList.length > 0 && (
-          <div className="relative flex items-center ml-2">
+          <div className="relative flex items-center ml-1">
             <select
               value={isHub ? "hub" : activeDocId}
               onChange={handleDocChange}
-              className="appearance-none bg-white/15 hover:bg-white/25 text-white text-xs font-semibold py-1.5 pl-3 pr-7 rounded-md cursor-pointer border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
+              className="appearance-none bg-white/15 hover:bg-white/25 text-white text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-md cursor-pointer border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
             >
               <option value="hub" className="bg-slate-800 text-white">📋 Document Hub</option>
               <optgroup label="API Specifications" className="bg-slate-800 text-white">
@@ -82,13 +96,7 @@ export function NavbarClient({
           </div>
         )}
 
-        {!isHub && (
-          <span className="hidden rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-medium text-white/90 sm:inline-block">
-            {version}
-          </span>
-        )}
-
-        <nav className="hidden items-center gap-1.5 md:flex ml-2">
+        <nav className="hidden items-center gap-1.5 md:flex ml-auto sm:ml-2">
           <Link
             href="/"
             className={cn(
@@ -127,10 +135,21 @@ export function NavbarClient({
           </Link>
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
-          <div className="text-white">
-            <ThemeToggle />
-          </div>
+        <div className="ml-auto md:ml-0 flex items-center gap-2">
+          {/* Fumadocs Search Trigger */}
+          <button
+            onClick={() => setOpenSearch(true)}
+            className="flex items-center gap-2 rounded-md bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-medium text-white/90 transition-colors"
+            title="Search docs (Cmd+K)"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Search...</span>
+            <kbd className="hidden lg:inline-block rounded bg-white/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
+              ⌘K
+            </kbd>
+          </button>
+
+          <ThemeToggle className="bg-white/10 hover:bg-white/20 text-white hover:text-white border border-white/10" />
         </div>
       </div>
     </header>

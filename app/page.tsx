@@ -29,12 +29,6 @@ export default async function Home() {
             <Sparkles className="h-3.5 w-3.5" />
             Documentation Hub
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-foreground">
-            API Documentation & Specifications
-          </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Select an API document below to explore integration guides, authentication rules, and interactive OpenAPI specifications.
-          </p>
         </div>
 
         {/* Documents Grid */}
@@ -54,7 +48,6 @@ export default async function Home() {
                       <h2 className="text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
                         {title}
                       </h2>
-                      <p className="font-mono text-xs text-muted-foreground">ID: {id}</p>
                     </div>
                   </div>
                   <Badge className="font-mono text-xs border-primary/30 text-primary bg-primary/10">

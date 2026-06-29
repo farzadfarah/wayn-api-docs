@@ -4,6 +4,8 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+import { cn } from "@/lib/utils";
+
 type Theme = "light" | "dark" | "system";
 
 function resolveTheme(theme: Theme) {
@@ -20,7 +22,7 @@ function applyTheme(theme: Theme) {
   document.documentElement.style.colorScheme = resolved;
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<Theme>("system");
 
@@ -59,11 +61,12 @@ export function ThemeToggle() {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon"
       aria-label="Toggle color theme"
-      title="Toggle color theme"
+      title={`Theme: ${theme}. Click to switch to ${nextTheme}.`}
       onClick={updateTheme}
+      className={cn("h-9 w-9 text-foreground hover:bg-muted transition-colors", className)}
     >
       <Icon className="h-4 w-4" />
     </Button>

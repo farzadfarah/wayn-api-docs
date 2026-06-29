@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { DocsShell } from "@/components/docs-shell";
-import { Card } from "@/components/ui/card";
+import { Callout } from "fumadocs-ui/components/callout";
+import { Cards, Card } from "fumadocs-ui/components/card";
 import { getApiMetadata } from "@/lib/openapi";
 
 export const dynamic = "force-dynamic";
@@ -17,55 +18,69 @@ export default async function AuthenticationPage(props: {
     ? auth.notes
     : [
         {
-          title: "Trusted systems",
+          title: "Trusted Systems",
           description:
-            "Call this API from trusted backend systems only. Do not expose credentials in browser bundles.",
+            "Call this API from trusted backend systems only. Do not expose credentials or access tokens in client-side browser bundles.",
         },
         {
-          title: "Operational support",
+          title: "Operational Support",
           description:
-            "Log request IDs and timestamps for troubleshooting, but keep authorization headers out of plain-text logs.",
+            "Log request correlation IDs and timestamps for troubleshooting, keeping authorization headers out of plain-text logs.",
         },
       ];
   const docQuery = `?doc=${api.docId}`;
 
   return (
     <DocsShell docId={api.docId}>
-      <article className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">Authentication ({api.title})</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{auth?.title}</h1>
-        <p className="mt-4 text-lg leading-8 text-muted-foreground">
-          {auth?.description}
-        </p>
-        <Card className="mt-8 p-5">
+      <article className="max-w-4xl space-y-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Security • {api.title}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{auth?.title}</h1>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            {auth?.description}
+          </p>
+        </div>
+
+        <Callout type="warn" title="Security Requirement">
+          Always store client secrets in secure environment variables or key vaults. Never commit credentials to version control.
+        </Callout>
+
+        <div className="rounded-xl border border-border bg-card p-6 shadow-xs space-y-4">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-1 h-5 w-5 text-primary" />
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
             <div>
-              <h2 className="font-semibold">Header format</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Send the access token as a bearer credential. Include the
-                request ID or correlation ID when reporting integration issues to support.
+              <h2 className="text-lg font-semibold text-foreground">Authorization Header Format</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Include the access token in the standard HTTP <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted">Authorization</code> header for all protected requests.
               </p>
             </div>
           </div>
-          <pre className="mt-4 overflow-x-auto rounded-md bg-muted p-4 font-mono text-xs">
-{auth?.headerExample}
-          </pre>
-        </Card>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {notes.map((note) => (
-            <Card key={note.title} className="p-5">
-              <h2 className="font-semibold">{note.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{note.description}</p>
-            </Card>
-          ))}
+          <div className="overflow-x-auto rounded-lg border border-border bg-slate-950 p-4 font-mono text-xs text-slate-100">
+            <pre><code>{auth?.headerExample}</code></pre>
+          </div>
         </div>
-        <Link
-          href={`/reference${docQuery}`}
-          className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary"
-        >
-          Explore endpoints <ArrowRight className="h-4 w-4" />
-        </Link>
+
+        <div className="pt-4">
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Security Best Practices</h2>
+          <Cards>
+            {notes.map((note) => (
+              <Card key={note.title} title={note.title}>
+                <p className="text-sm text-muted-foreground leading-6">{note.description}</p>
+              </Card>
+            ))}
+          </Cards>
+        </div>
+
+        <div className="pt-6">
+          <Link
+            href={`/reference${docQuery}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            Explore Interactive API Reference <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </article>
     </DocsShell>
   );

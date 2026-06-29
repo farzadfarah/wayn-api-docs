@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { DocsShell } from "@/components/docs-shell";
-import { Card } from "@/components/ui/card";
+import { Steps, Step } from "fumadocs-ui/components/steps";
+import { Callout } from "fumadocs-ui/components/callout";
 import { getApiMetadata } from "@/lib/openapi";
 
 export const dynamic = "force-dynamic";
@@ -37,29 +38,44 @@ export default async function GettingStartedPage(props: {
 
   return (
     <DocsShell docId={api.docId}>
-      <article className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">Getting Started ({api.title})</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{guide?.title}</h1>
-        <p className="mt-4 text-lg leading-8 text-muted-foreground">
-          {guide?.description}
-        </p>
-        <div className="mt-8 space-y-6">
-          {steps.map((step, index) => (
-            <Card key={step.title} className="p-5">
-              <h2 className="font-semibold">{index + 1}. {step.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.description}</p>
-              {step.code ? (
-                <pre className="mt-4 overflow-x-auto rounded-md bg-muted p-4 font-mono text-xs leading-6">{step.code}</pre>
-              ) : null}
-            </Card>
-          ))}
+      <article className="max-w-4xl space-y-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Getting Started • {api.title}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{guide?.title}</h1>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            {guide?.description}
+          </p>
         </div>
-        <Link
-          href={`/docs/authentication${docQuery}`}
-          className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary"
-        >
-          Continue to authentication <ArrowRight className="h-4 w-4" />
-        </Link>
+
+        <Callout type="info" title="Production Base URL">
+          All API requests for {api.title} should be targeted at <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted">{api.serverUrl}</code> unless testing in a local sandbox.
+        </Callout>
+
+        <div className="pt-4">
+          <h2 className="text-xl font-semibold mb-6 text-foreground">Integration Steps</h2>
+          <Steps>
+            {steps.map((step) => (
+              <Step key={step.title}>
+                <h3 className="text-base font-semibold text-foreground">{step.title}</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                {step.code ? (
+                  <div className="mt-3 overflow-x-auto rounded-lg border border-border bg-slate-950 p-4 font-mono text-xs text-slate-100 shadow-sm">
+                    <pre><code>{step.code}</code></pre>
+                  </div>
+                ) : null}
+              </Step>
+            ))}
+          </Steps>
+        </div>
+
+        <div className="pt-6">
+          <Link
+            href={`/docs/authentication${docQuery}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            Continue to Authentication Guide <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </article>
     </DocsShell>
   );

@@ -114,9 +114,17 @@ body {
   --scalar-sidebar-search-border-color: var(--border);
 }
 
-.scalar-app .darklight-reference,
-.scalar-app .open-api-client-button,
-.scalar-app a[href*="client.scalar.com"] {
+.darklight-reference,
+.scalar-mcp-layer,
+.open-api-client-button,
+a[href*="scalar.com"],
+div[class*="darklight-reference"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
+
 
