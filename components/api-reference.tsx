@@ -36,7 +36,7 @@ export function ApiReference() {
             url: "/openapi.yaml",
             hideModels: true,
             hideSearch: true,
-            hideClientButton: false,
+            hideClientButton: true,
             showSidebar: true,
             showDeveloperTools: "localhost",
             showToolbar: "localhost",

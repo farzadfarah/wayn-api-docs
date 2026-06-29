@@ -68,18 +68,6 @@ export function MobileNav({ title = "WAYN API" }: { title?: string }) {
                 <Code2 className="h-4 w-4" />
                 &lt;&gt; API Reference
               </Link>
-              <Link
-                href="/changelog"
-                className={cn(
-                  "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold transition-colors",
-                  pathname === "/changelog"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <MessageSquare className="h-4 w-4" />
-                Discussions
-              </Link>
             </nav>
           </div>
         </div>

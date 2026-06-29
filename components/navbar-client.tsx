@@ -69,41 +69,9 @@ export function NavbarClient({
             <Code2 className="h-3.5 w-3.5" />
             &lt;&gt; API Reference
           </Link>
-          <Link
-            href="/changelog"
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-              pathname === "/changelog"
-                ? "bg-white/20 text-white shadow-xs"
-                : "text-white/80 hover:bg-white/10 hover:text-white",
-            )}
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-            Discussions
-          </Link>
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
-          <div className="relative hidden w-44 items-center sm:flex lg:w-60">
-            <Search className="absolute left-2.5 h-3.5 w-3.5 text-white/60" />
-            <input
-              type="text"
-              placeholder="Search..."
-              readOnly
-              className="w-full rounded-md border border-white/20 bg-white/15 py-1.5 pl-8 pr-14 font-sans text-xs text-white placeholder:text-white/60 focus:outline-hidden"
-            />
-            <kbd className="absolute right-2 rounded bg-white/20 px-1.5 py-0.5 font-mono text-[10px] font-medium text-white/90">
-              CTRL-K
-            </kbd>
-          </div>
-
-          <button
-            type="button"
-            className="hidden text-xs font-semibold text-white/90 transition-colors hover:text-white sm:inline-block px-2 py-1 cursor-pointer"
-          >
-            Log In
-          </button>
-
           <div className="text-white">
             <ThemeToggle />
           </div>

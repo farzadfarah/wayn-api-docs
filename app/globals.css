@@ -113,3 +113,10 @@ body {
   --scalar-sidebar-search-background: var(--muted);
   --scalar-sidebar-search-border-color: var(--border);
 }
+
+.scalar-app .darklight-reference,
+.scalar-app .open-api-client-button,
+.scalar-app a[href*="client.scalar.com"] {
+  display: none !important;
+}
+
