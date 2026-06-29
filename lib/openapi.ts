@@ -171,7 +171,7 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
   const currentDoc = docList.find((d) => d.id === docId) ?? docList[0];
 
   let source = "";
-  let specUrl = currentDoc?.url ?? "";
+  const specUrl = currentDoc?.url ?? "";
 
   if (currentDoc?.url && (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://"))) {
     try {

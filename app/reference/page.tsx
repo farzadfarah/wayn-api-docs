@@ -18,8 +18,6 @@ export default async function ReferencePage(props: {
         <ApiReference
           specUrl={api.specUrl}
           specContent={api.specContent}
-          endpoints={api.endpoints}
-          tags={api.tags}
         />
       </Suspense>
     </DocsShell>

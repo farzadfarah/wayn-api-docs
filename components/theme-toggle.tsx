@@ -24,14 +24,14 @@ function applyTheme(theme: Theme) {
 
 export function ThemeToggle({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("theme") as Theme | null;
     const initialTheme =
       storedTheme === "light" || storedTheme === "dark" || storedTheme === "system"
         ? storedTheme
-        : "system";
+        : "dark";
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initialTheme);
@@ -40,7 +40,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      if ((window.localStorage.getItem("theme") ?? "system") === "system") {
+      if ((window.localStorage.getItem("theme") ?? "dark") === "system") {
         applyTheme("system");
       }
     };
@@ -50,7 +50,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   const nextTheme = theme === "dark" ? "light" : theme === "light" ? "system" : "dark";
-  const Icon = !mounted ? Monitor : theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
+  const Icon = !mounted ? Moon : theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
 
   function updateTheme() {
     window.localStorage.setItem("theme", nextTheme);

@@ -96,6 +96,24 @@ export function DocsLayoutClient({
     return map;
   }, [filteredEndpoints]);
 
+  const activeEpObj = useMemo(() => {
+    if (!activeEndpoint) return null;
+    try {
+      const decoded = decodeURIComponent(activeEndpoint);
+      const [method, ...pathParts] = decoded.split("::");
+      const path = pathParts.join("::");
+      const normMethod = (method || "").toUpperCase();
+      const normPath = (path || "").toLowerCase().replace(/\/$/, "");
+      return api.endpoints.find(
+        (ep) =>
+          ep.method.toUpperCase() === normMethod &&
+          ep.path.toLowerCase().replace(/\/$/, "") === normPath,
+      );
+    } catch (e) {
+      return null;
+    }
+  }, [activeEndpoint, api.endpoints]);
+
   const guideLinks = [
     { label: "Overview", href: `/docs/overview${docQuery}`, icon: BookOpen },
     { label: "Quick Start", href: `/docs/getting-started${docQuery}`, icon: Rocket },
@@ -273,16 +291,32 @@ export function DocsLayoutClient({
             {!isLandingPage && (
               <>
                 <span className="text-muted-foreground/40 font-light text-xs">/</span>
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground flex-wrap">
                   <span className="text-foreground font-semibold">{api.title}</span>
-                  <span>/</span>
-                  <span className="capitalize">
-                    {pathname === "/reference"
-                      ? activeEndpoint
-                        ? activeEndpoint.split("::")[1] || "Reference"
-                        : "API Reference"
-                      : pathname.split("/").pop()?.replace("-", " ") || "Docs"}
-                  </span>
+                  {pathname === "/reference" ? (
+                    activeEndpoint ? (
+                      <>
+                        <span className="text-muted-foreground/40 font-light">/</span>
+                        <span className="text-primary font-medium">{activeEpObj?.tag || "Operations"}</span>
+                        <span className="text-muted-foreground/40 font-light">/</span>
+                        <span className="font-mono text-foreground font-semibold bg-muted/60 px-2 py-0.5 rounded border border-border">
+                          {activeEpObj?.path || activeEndpoint.split("::")[1]}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-muted-foreground/40 font-light">/</span>
+                        <span className="text-foreground font-medium">API Reference</span>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <span className="text-muted-foreground/40 font-light">/</span>
+                      <span className="capitalize text-foreground font-medium">
+                        {pathname.split("/").pop()?.replace("-", " ") || "Docs"}
+                      </span>
+                    </>
+                  )}
                 </div>
               </>
             )}

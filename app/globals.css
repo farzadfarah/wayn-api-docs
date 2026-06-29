@@ -94,47 +94,115 @@ body {
 
 .dark .scalar-app {
   color-scheme: dark;
-  --scalar-background-1: #0b0f17;
-  --scalar-background-2: #111827;
-  --scalar-background-3: #1f2937;
-  --scalar-color-1: #f3f4f6;
-  --scalar-color-2: #9ca3af;
-  --scalar-color-3: #6b7280;
-  --scalar-color-accent: #3b82f6;
-  --scalar-background-accent: rgba(59, 130, 246, 0.18);
-  --scalar-border-color: #1f2937;
-  --scalar-sidebar-background-1: #0b0f17;
-  --scalar-sidebar-color-1: #f3f4f6;
-  --scalar-sidebar-color-2: #9ca3af;
-  --scalar-sidebar-border-color: #1f2937;
-  --scalar-sidebar-item-hover-background: #111827;
-  --scalar-sidebar-item-active-background: #1e293b;
-  --scalar-sidebar-color-active: #60a5fa;
-  --scalar-sidebar-search-background: #111827;
-  --scalar-sidebar-search-border-color: #1f2937;
+  --scalar-background-1: #0d1524;
+  --scalar-background-2: #132033;
+  --scalar-background-3: #1b2c44;
+  --scalar-color-1: #edf4ff;
+  --scalar-color-2: #9fb2cb;
+  --scalar-color-3: #7287a3;
+  --scalar-color-accent: #60a5fa;
+  --scalar-background-accent: rgba(96, 165, 250, 0.18);
+  --scalar-border-color: #223551;
+  --scalar-sidebar-background-1: #0d1524;
+  --scalar-sidebar-color-1: #edf4ff;
+  --scalar-sidebar-color-2: #9fb2cb;
+  --scalar-sidebar-border-color: #223551;
+  --scalar-sidebar-item-hover-background: #132033;
+  --scalar-sidebar-item-active-background: #1b2c44;
+  --scalar-sidebar-color-active: #8cc4ff;
+  --scalar-sidebar-search-background: #132033;
+  --scalar-sidebar-search-border-color: #223551;
 }
 
-/* Custom styling to match ReadMe API Playground aesthetics */
-html body .scalar-app,
-html body [class*="scalar"] {
+/* Scope Scalar palette overrides to the root embedded reference only. */
+html:not(.dark) .scalar-app.light-mode,
+html:not(.dark) .scalar-app:not(.dark-mode) {
   --scalar-radius: 8px !important;
   --scalar-radius-lg: 10px !important;
   --scalar-color-accent: #2563eb !important;
-  --scalar-background-accent: rgba(37, 99, 235, 0.15) !important;
+  --scalar-background-accent: rgba(37, 99, 235, 0.12) !important;
+  --scalar-background-1: #ffffff !important;
+  --scalar-background-2: #f8fafc !important;
+  --scalar-background-3: #f1f5f9 !important;
+  --scalar-card-background-1: #ffffff !important;
+  --scalar-card-background-2: #f8fafc !important;
+  --scalar-code-background: #f8fafc !important;
+  --scalar-sidebar-background-1: #ffffff !important;
+  --scalar-color-1: #0f172a !important;
+  --scalar-color-2: #475569 !important;
+  --scalar-color-3: #64748b !important;
+  --scalar-border-color: #e2e8f0 !important;
 }
 
-html body.dark .scalar-app,
-html body .dark .scalar-app,
-html body [class*="dark"] [class*="scalar"] {
-  --scalar-background-1: #0b0f17 !important;
-  --scalar-background-2: #111827 !important;
-  --scalar-background-3: #1f2937 !important;
-  --scalar-color-1: #f3f4f6 !important;
-  --scalar-color-2: #9ca3af !important;
-  --scalar-color-3: #6b7280 !important;
-  --scalar-color-accent: #3b82f6 !important;
-  --scalar-background-accent: rgba(59, 130, 246, 0.18) !important;
-  --scalar-border-color: #1f2937 !important;
+html.dark .scalar-app.dark-mode {
+  --scalar-radius: 8px !important;
+  --scalar-radius-lg: 10px !important;
+  --scalar-background-1: #0d1524 !important;
+  --scalar-background-2: #132033 !important;
+  --scalar-background-3: #1b2c44 !important;
+  --scalar-card-background-1: #0d1524 !important;
+  --scalar-card-background-2: #132033 !important;
+  --scalar-code-background: #132033 !important;
+  --scalar-sidebar-background-1: #0d1524 !important;
+  --scalar-color-1: #edf4ff !important;
+  --scalar-color-2: #9fb2cb !important;
+  --scalar-color-3: #7287a3 !important;
+  --scalar-color-accent: #60a5fa !important;
+  --scalar-background-accent: rgba(96, 165, 250, 0.18) !important;
+  --scalar-border-color: #223551 !important;
+}
+
+.scalar-app.dark-mode .dark-mode {
+  --scalar-background-1: #0d1524 !important;
+  --scalar-background-2: #132033 !important;
+  --scalar-background-3: #1b2c44 !important;
+  --scalar-card-background-1: #0d1524 !important;
+  --scalar-card-background-2: #132033 !important;
+  --scalar-code-background: #132033 !important;
+  --scalar-sidebar-background-1: #0d1524 !important;
+  --scalar-color-1: #edf4ff !important;
+  --scalar-color-2: #9fb2cb !important;
+  --scalar-color-3: #7287a3 !important;
+  --scalar-border-color: #223551 !important;
+}
+
+.scalar-app.dark-mode .scalar-card,
+.scalar-app.dark-mode [class*="bg-b-2"],
+.scalar-app.dark-mode [class*="bg-b-3"],
+.scalar-app.dark-mode [class*="request-card"] {
+  background-color: #132033 !important;
+  border-color: #223551 !important;
+  color: #edf4ff !important;
+}
+
+.scalar-app .operation-description:has(> .markdown:empty) {
+  margin-bottom: 0 !important;
+}
+
+.scalar-app .operation-description > .markdown:empty {
+  display: none !important;
+}
+
+.scalar-app .operation-auth {
+  margin-bottom: 0 !important;
+}
+
+.scalar-app .operation-title {
+  margin-bottom: 8px !important;
+}
+
+.scalar-app.light-mode .dark-mode {
+  --scalar-background-1: #ffffff !important;
+  --scalar-background-2: #f8fafc !important;
+  --scalar-background-3: #f1f5f9 !important;
+  --scalar-card-background-1: #ffffff !important;
+  --scalar-card-background-2: #f8fafc !important;
+  --scalar-code-background: #f8fafc !important;
+  --scalar-sidebar-background-1: #ffffff !important;
+  --scalar-color-1: #0f172a !important;
+  --scalar-color-2: #475569 !important;
+  --scalar-color-3: #64748b !important;
+  --scalar-border-color: #e2e8f0 !important;
 }
 
 html body .scalar-app [class*="scalar-card"],
@@ -189,5 +257,3 @@ div[class*="darklight-reference"] {
   overflow: hidden !important;
   pointer-events: none !important;
 }
-
-
