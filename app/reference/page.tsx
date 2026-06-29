@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ApiReference } from "@/components/api-reference";
 import { DocsShell } from "@/components/docs-shell";
 import { getApiMetadata } from "@/lib/openapi";
@@ -5,7 +6,7 @@ import { getApiMetadata } from "@/lib/openapi";
 export const dynamic = "force-dynamic";
 
 export default async function ReferencePage(props: {
-  searchParams: Promise<{ doc?: string }>;
+  searchParams: Promise<{ doc?: string; endpoint?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const docId = searchParams.doc;
@@ -13,12 +14,14 @@ export default async function ReferencePage(props: {
 
   return (
     <DocsShell docId={api.docId}>
-      <div className="mb-6 max-w-3xl">
-        <p className="text-sm font-medium text-primary">API Reference</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{api.title} reference</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{api.shortDescription}</p>
-      </div>
-      <ApiReference specUrl={api.specUrl} />
+      <Suspense fallback={<div className="h-96 rounded-xl border border-border bg-card animate-pulse" />}>
+        <ApiReference
+          specUrl={api.specUrl}
+          specContent={api.specContent}
+          endpoints={api.endpoints}
+          tags={api.tags}
+        />
+      </Suspense>
     </DocsShell>
   );
 }

@@ -1,10 +1,13 @@
-import { Navbar } from "@/components/navbar";
+import { Suspense } from "react";
+import { DocsLayoutClient } from "@/components/docs-layout-client";
+import { getApiMetadata } from "@/lib/openapi";
 
-export function DocsShell({ children, docId }: { children: React.ReactNode; docId?: string }) {
+export async function DocsShell({ children, docId }: { children: React.ReactNode; docId?: string }) {
+  const api = await getApiMetadata(docId);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar docId={docId} />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <DocsLayoutClient api={api}>{children}</DocsLayoutClient>
+    </Suspense>
   );
 }

@@ -35,6 +35,7 @@ export type ApiEndpoint = {
 export type ApiMetadata = {
   docId: string;
   specUrl: string;
+  specContent?: string;
   docList: DocItem[];
   title: string;
   version: string;
@@ -144,7 +145,14 @@ function operationSummary(method: string, route: string, operation?: OpenApiOper
 
 export async function getDocList(): Promise<DocItem[]> {
   try {
-    const res = await fetch(INDEX_URL, { cache: "no-store" });
+    const fetchUrl = `${INDEX_URL}?t=${Date.now()}`;
+    const res = await fetch(fetchUrl, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
+    });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -167,7 +175,16 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
 
   if (currentDoc?.url && (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://"))) {
     try {
-      const res = await fetch(currentDoc.url, { cache: "no-store" });
+      const fetchUrl = currentDoc.url.includes("?")
+        ? `${currentDoc.url}&t=${Date.now()}`
+        : `${currentDoc.url}?t=${Date.now()}`;
+      const res = await fetch(fetchUrl, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       if (res.ok) {
         source = await res.text();
       }
@@ -197,16 +214,19 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
     endpoints.find((endpoint) => endpoint.method === "POST" && endpoint !== authEndpoint) ??
     endpoints.find((endpoint) => endpoint !== authEndpoint) ??
     endpoints[0];
-  const title = document.info?.title ?? currentDoc.title ?? "API Documentation";
+  const title = document.info?.title ?? currentDoc?.title ?? "API Documentation";
   const version = document.info?.version ?? "latest";
-  const description = document.info?.description ?? currentDoc.description ?? "";
-  const shortDescription = firstParagraph(document.info?.description ?? currentDoc.description);
+  const description = document.info?.description ?? currentDoc?.description ?? "";
+  const shortDescription = firstParagraph(document.info?.description ?? currentDoc?.description);
   const serverUrl = document.servers?.find((server) => server.url)?.url ?? "https://api.example.com";
   const docs = document["x-docs"] ?? {};
 
+  const activeDocId = currentDoc?.id ?? docId ?? "default";
+
   return {
-    docId: currentDoc.id,
+    docId: activeDocId,
     specUrl,
+    specContent: source,
     docList,
     title,
     version,
@@ -224,8 +244,8 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
         eyebrow: `${title} ${version}`,
         title,
         description: shortDescription,
-        primaryCta: { label: "Start integration", href: `/docs/getting-started?doc=${currentDoc.id}` },
-        secondaryCta: { label: "Browse API reference", href: `/reference?doc=${currentDoc.id}` },
+        primaryCta: { label: "Start integration", href: `/docs/getting-started?doc=${activeDocId}` },
+        secondaryCta: { label: "Browse API reference", href: `/reference?doc=${activeDocId}` },
         ...docs.hero,
       },
       overview: {
