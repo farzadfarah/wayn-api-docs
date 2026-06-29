@@ -71,7 +71,7 @@ export function ApiReference({ specUrl = "/openapi.yaml" }: { specUrl?: string }
               apiBaseUrl: "https://api.scalar.com",
             },
             default: false,
-            layout: "modern",
+            layout: "classic",
             isEditable: false,
             documentDownloadType: "both",
             hideTestRequestButton: false,
