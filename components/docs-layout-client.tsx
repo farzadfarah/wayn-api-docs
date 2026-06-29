@@ -14,6 +14,8 @@ import {
   KeyRound,
   History,
   Rocket,
+  PanelLeft,
+  X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -58,6 +60,7 @@ export function DocsLayoutClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isLandingPage = pathname === "/";
   const activeDocId = api.docId;
@@ -121,177 +124,219 @@ export function DocsLayoutClient({
     { label: "Changelog", href: `/changelog${docQuery}`, icon: History },
   ];
 
-  return (
-    <div className="flex min-h-screen bg-background text-foreground antialiased">
-      {/* Left Fixed Sidebar - Fumadocs Style (Only show when inside documentation pages) */}
-      {!isLandingPage && (
-        <aside className="w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card/60 backdrop-blur-md flex flex-col h-screen sticky top-0 z-30">
-          {/* Sidebar Header: Branding & Doc Selector */}
-          <div className="p-4 border-b border-border/60 space-y-3">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-2 font-bold text-lg hover:opacity-90 transition-opacity">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={mainLogoUrl} alt="7x" className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Docs
-                </span>
+  const renderSidebarContent = (onItemClick?: () => void) => (
+    <>
+      {/* Sidebar Header: Branding & Doc Selector */}
+      <div className="p-4 border-b border-border/60 space-y-3">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            onClick={onItemClick}
+            className="flex items-center gap-2 font-bold text-lg hover:opacity-90 transition-opacity"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mainLogoUrl} alt="7x" className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              Docs
+            </span>
+          </Link>
+          {onItemClick && (
+            <button
+              type="button"
+              onClick={onItemClick}
+              className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/60 md:hidden"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        {api.docList.length > 0 && (
+          <div className="relative flex items-center">
+            <select
+              value={activeDocId}
+              onChange={(e) => {
+                handleDocChange(e);
+                onItemClick?.();
+              }}
+              className="w-full appearance-none bg-muted/60 hover:bg-muted text-foreground text-xs font-semibold py-2 pl-3 pr-8 rounded-lg cursor-pointer border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
+            >
+              <option value="hub">📋 Document Hub</option>
+              <optgroup label="API Specifications">
+                {api.docList.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.title}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+            <ChevronDown className="absolute right-2.5 h-3.5 w-3.5 pointer-events-none text-muted-foreground" />
+          </div>
+        )}
+      </div>
+
+      {/* Search Bar */}
+      <div className="px-4 py-3 border-b border-border/40">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Filter endpoints..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-md border border-border/80 bg-background/80 pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </div>
+      </div>
+
+      {/* Navigation Content */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
+        {/* Guides Section */}
+        <div className="space-y-1">
+          <p className="px-2 pb-1 text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider">
+            Guides & Documentation
+          </p>
+          {guideLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href.split("?")[0];
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={onItemClick}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{link.label}</span>
               </Link>
-            </div>
+            );
+          })}
+        </div>
 
-            {api.docList.length > 0 && (
-              <div className="relative flex items-center">
-                <select
-                  value={activeDocId}
-                  onChange={handleDocChange}
-                  className="w-full appearance-none bg-muted/60 hover:bg-muted text-foreground text-xs font-semibold py-2 pl-3 pr-8 rounded-lg cursor-pointer border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors"
-                >
-                  <option value="hub">📋 Document Hub</option>
-                  <optgroup label="API Specifications">
-                    {api.docList.map((doc) => (
-                      <option key={doc.id} value={doc.id}>
-                        {doc.title}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-                <ChevronDown className="absolute right-2.5 h-3.5 w-3.5 pointer-events-none text-muted-foreground" />
-              </div>
-            )}
+        {/* Endpoints Section */}
+        <div className="space-y-3 pt-2 border-t border-border/40">
+          <div className="flex items-center justify-between px-2">
+            <p className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider">
+              API Operations
+            </p>
+            <Link
+              href={`/reference${docQuery}`}
+              onClick={onItemClick}
+              className={cn(
+                "text-[10px] font-medium px-1.5 py-0.5 rounded transition-colors",
+                pathname === "/reference" && !activeEndpoint
+                  ? "bg-primary text-primary-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground bg-muted",
+              )}
+            >
+              All Operations
+            </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="px-4 py-3 border-b border-border/40">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Filter endpoints..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-md border border-border/80 bg-background/80 pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          {/* Navigation Content */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
-            {/* Guides Section */}
-            <div className="space-y-1">
-              <p className="px-2 pb-1 text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider">
-                Guides & Documentation
+          {Object.entries(groupedEndpoints).map(([tagGroup, epList]) => (
+            <div key={tagGroup} className="space-y-1">
+              <p className="px-2 pt-2 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                {tagGroup}
               </p>
-              {guideLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = pathname === link.href.split("?")[0];
+              {epList.map((ep) => {
+                const epKey = `${ep.method}::${ep.path}`;
+                const isSelected = pathname === "/reference" && activeEndpoint === epKey;
+                const href = `/reference${docQuery}&endpoint=${encodeURIComponent(epKey)}`;
+                const color = methodColors[ep.method] || {
+                  bg: "bg-muted",
+                  text: "text-foreground",
+                  border: "border-border",
+                };
+
                 return (
                   <Link
-                    key={link.href}
-                    href={link.href}
+                    key={epKey}
+                    href={href}
+                    onClick={onItemClick}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium transition-colors",
-                      isActive
-                        ? "bg-primary/10 text-primary font-semibold border border-primary/20"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                      "flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-all duration-150 border",
+                      isSelected
+                        ? "bg-card border-primary/50 text-foreground font-medium shadow-xs ring-1 ring-primary/30"
+                        : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span>{link.label}</span>
+                    <span
+                      className={cn(
+                        "px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border shrink-0",
+                        color.bg,
+                        color.text,
+                        color.border,
+                      )}
+                    >
+                      {ep.method}
+                    </span>
+                    <span className="truncate flex-1 text-[11.5px]">{ep.summary}</span>
                   </Link>
                 );
               })}
             </div>
+          ))}
+        </div>
+      </nav>
 
-            {/* Endpoints Section */}
-            <div className="space-y-3 pt-2 border-t border-border/40">
-              <div className="flex items-center justify-between px-2">
-                <p className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider">
-                  API Operations
-                </p>
-                <Link
-                  href={`/reference${docQuery}`}
-                  className={cn(
-                    "text-[10px] font-medium px-1.5 py-0.5 rounded transition-colors",
-                    pathname === "/reference" && !activeEndpoint
-                      ? "bg-primary text-primary-foreground font-semibold"
-                      : "text-muted-foreground hover:text-foreground bg-muted",
-                  )}
-                >
-                  All Operations
-                </Link>
-              </div>
+      {/* Footer */}
+      <div className="p-3 border-t border-border/60 flex items-center justify-between bg-muted/30">
+        <Link
+          href="/"
+          onClick={onItemClick}
+          className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Layers className="h-3.5 w-3.5" />
+          Doc Hub
+        </Link>
+        <ThemeToggle />
+      </div>
+    </>
+  );
 
-              {Object.entries(groupedEndpoints).map(([tagGroup, epList]) => (
-                <div key={tagGroup} className="space-y-1">
-                  <p className="px-2 pt-2 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                    {tagGroup}
-                  </p>
-                  {epList.map((ep) => {
-                    const epKey = `${ep.method}::${ep.path}`;
-                    const isSelected = pathname === "/reference" && activeEndpoint === epKey;
-                    const href = `/reference${docQuery}&endpoint=${encodeURIComponent(epKey)}`;
-                    const color = methodColors[ep.method] || {
-                      bg: "bg-muted",
-                      text: "text-foreground",
-                      border: "border-border",
-                    };
-
-                    return (
-                      <Link
-                        key={epKey}
-                        href={href}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-all duration-150 border",
-                          isSelected
-                            ? "bg-card border-primary/50 text-foreground font-medium shadow-xs ring-1 ring-primary/30"
-                            : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border shrink-0",
-                            color.bg,
-                            color.text,
-                            color.border,
-                          )}
-                        >
-                          {ep.method}
-                        </span>
-                        <span className="truncate flex-1 text-[11.5px]">{ep.summary}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          {/* Footer */}
-          <div className="p-3 border-t border-border/60 flex items-center justify-between bg-muted/30">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Layers className="h-3.5 w-3.5" />
-              Doc Hub
-            </Link>
-            <ThemeToggle />
-          </div>
+  return (
+    <div className="flex min-h-screen bg-background text-foreground antialiased">
+      {/* Desktop Left Fixed Sidebar */}
+      {!isLandingPage && (
+        <aside className="hidden md:flex w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card/60 backdrop-blur-md flex-col h-screen sticky top-0 z-30">
+          {renderSidebarContent()}
         </aside>
+      )}
+
+      {/* Mobile Drawer / Sheet */}
+      {!isLandingPage && mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Slide-out Sidebar Panel */}
+          <aside className="relative flex w-80 max-w-[85vw] flex-col bg-card border-r border-border shadow-2xl h-full z-10 animate-in slide-in-from-left duration-200">
+            {renderSidebarContent(() => setMobileMenuOpen(false))}
+          </aside>
+        </div>
       )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Header Bar */}
-        <header className="h-14 shrink-0 border-b border-border/60 bg-card/40 backdrop-blur-md px-6 flex items-center justify-between z-20">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2 font-bold text-base hover:opacity-90 transition-opacity">
+        <header className="h-14 shrink-0 border-b border-border/60 bg-card/40 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-20">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link href="/" className="flex items-center gap-2 font-bold text-base hover:opacity-90 transition-opacity shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={mainLogoUrl} alt="7x" className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
             </Link>
             {!isLandingPage && (
               <>
-                <span className="text-muted-foreground/40 font-light text-xs">/</span>
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground flex-wrap">
+                <span className="text-muted-foreground/40 font-light text-xs hidden sm:inline">/</span>
+                <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground flex-wrap">
                   <span className="text-foreground font-semibold">{api.title}</span>
                   {pathname === "/reference" ? (
                     activeEndpoint ? (
@@ -321,18 +366,28 @@ export function DocsLayoutClient({
               </>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {!isLandingPage && (
-              <span className="font-mono text-xs px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary font-semibold">
+              <span className="font-mono text-xs px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary font-semibold hidden sm:inline-block">
                 {api.version || "v1"}
               </span>
             )}
             <ThemeToggle />
+            {!isLandingPage && (
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/60 transition-colors"
+                aria-label="Toggle navigation menu"
+              >
+                <PanelLeft className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </header>
 
         {/* Main Body */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className={cn("w-full space-y-6", pathname !== "/reference" && "mx-auto max-w-5xl")}>
             {children}
           </div>
@@ -341,3 +396,4 @@ export function DocsLayoutClient({
     </div>
   );
 }
+

@@ -79,7 +79,6 @@ export function ApiReference({
       .scalar-app [class*="introduction"],
       .scalar-app [class*="server"],
       .scalar-app [class*="download"],
-      .scalar-app [class*="client-libraries"],
       .scalar-app [class*="tag-header"],
       .scalar-app [class*="tag-section"],
       .scalar-app [class*="operations-overview"],
@@ -115,8 +114,6 @@ export function ApiReference({
         display: none !important;
         width: 0 !important;
       }
-      .scalar-app,
-      .scalar-app > *,
       .scalar-app [class*="references-rendered"],
       .scalar-app [class*="references-layout"],
       .scalar-app main,
@@ -129,6 +126,57 @@ export function ApiReference({
         padding-left: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
+      }
+
+      /* Fumadocs Structure Alignment: Separate Path and Language Selector */
+      /* Hide duplicate path/method inside code block headers so header is dedicated purely to Language Selection */
+      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="endpoint"],
+      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="path"],
+      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="url"],
+      .scalar-app [class*="code-snippet"] [class*="path"],
+      .scalar-app [class*="code-header"] [class*="path"],
+      .scalar-app [class*="code-header"] [class*="url"],
+      .scalar-app [class*="request-header"] [class*="path"],
+      .scalar-app [class*="request-header"] [class*="url"],
+      .scalar-app [class*="request"] [class*="header"] > div:first-child:not([class*="client"]),
+      .scalar-app [class*="code-header"] > div:first-child:not([class*="client"]) {
+        display: none !important;
+      }
+
+      /* Style code card header as a clean dedicated Language Selector Bar like Fumadocs */
+      .scalar-app [class*="code-header"],
+      .scalar-app [class*="request-header"],
+      .scalar-app [class*="snippet-header"],
+      .scalar-app [class*="request-card"] [class*="scalar-card-header"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 8px 14px !important;
+        border-bottom: 1px solid var(--scalar-border-color, var(--border)) !important;
+        background-color: var(--scalar-background-2, var(--muted)) !important;
+        min-height: 40px !important;
+      }
+
+      .scalar-app [class*="client-picker"],
+      .scalar-app [class*="language-picker"],
+      .scalar-app [class*="client-libraries"] {
+        margin-left: 0 !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Prevent popover dropdowns from inheriting structural width/margin overrides */
+      .scalar-app [class*="popover"],
+      .scalar-app [class*="dropdown"],
+      .scalar-app [class*="floating"],
+      .scalar-app [class*="select-content"],
+      .scalar-app [class*="picker-content"],
+      .scalar-app [role="menu"],
+      .scalar-app [role="listbox"],
+      .scalar-app [data-radix-popper-content-wrapper] {
+        width: auto !important;
+        max-width: 320px !important;
+        margin: 0 !important;
+        z-index: 1000 !important;
       }
       .scalar-app .operation-auth {
         margin-bottom: 0 !important;
@@ -177,10 +225,10 @@ export function ApiReference({
   };
 
   return (
-    <div className="w-full rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+    <div className="w-full rounded-xl border border-border bg-card shadow-sm">
       <div
         className={cn(
-          "scalar-app overflow-hidden w-full transition-colors duration-200",
+          "scalar-app w-full transition-colors duration-200",
           colorMode === "dark" ? "dark-mode" : "light-mode",
         )}
       >
