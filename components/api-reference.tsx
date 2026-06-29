@@ -79,7 +79,7 @@ export function ApiReference({ specUrl = "/openapi.yaml" }: { specUrl?: string }
             hideDarkModeToggle: true,
             withDefaultFonts: true,
             defaultOpenFirstTag: true,
-            defaultOpenAllTags: false,
+            defaultOpenAllTags: true,
             expandAllModelSections: false,
             expandAllResponses: false,
             expandAllSchemaProperties: false,
