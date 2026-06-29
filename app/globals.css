@@ -164,68 +164,17 @@ html body .scalar-app .scalar-button-primary:hover {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
 }
 
-/* Language Selector & Colorful Brand Icons */
+/* Language Selector Clean Enhancements */
 html body .scalar-app [class*="client-libraries"],
-html body .scalar-app [class*="target-selector"],
-html body .scalar-app [class*="client-selector"] {
-  padding: 8px 0 !important;
-}
-
-html body .scalar-app [class*="client-libraries"] button,
-html body .scalar-app [class*="target-selector"] button,
-html body .scalar-app [class*="client-selector"] button,
-html body .scalar-app [class*="language"] button {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 8px 14px !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
+html body .scalar-app [class*="client-picker"] {
   border-radius: 8px !important;
-  transition: all 0.15s ease !important;
 }
 
-/* Active language tab pill container */
-html body .scalar-app [class*="client-libraries"] button[class*="active"],
-html body .scalar-app [class*="target-selector"] button[class*="active"],
-html body .scalar-app [class*="client-selector"] button[class*="selected"],
-html body .scalar-app [class*="client-selector"] button[aria-selected="true"] {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+html body .scalar-app svg {
+  display: inline-block !important;
+  vertical-align: middle !important;
 }
 
-/* Brand Colors for Language Icons */
-html body .scalar-app svg[class*="node"],
-html body .scalar-app svg[class*="js"],
-html body .scalar-app [button*="node"] svg,
-html body .scalar-app [title*="Node"] svg {
-  color: #22c55e !important;
-}
-
-html body .scalar-app svg[class*="ruby"],
-html body .scalar-app [title*="Ruby"] svg {
-  color: #ef4444 !important;
-}
-
-html body .scalar-app svg[class*="php"],
-html body .scalar-app [title*="PHP"] svg {
-  color: #818cf8 !important;
-}
-
-html body .scalar-app svg[class*="python"],
-html body .scalar-app [title*="Python"] svg {
-  color: #f59e0b !important;
-}
-
-html body .scalar-app svg[class*="shell"],
-html body .scalar-app svg[class*="curl"],
-html body .scalar-app [title*="Shell"] svg {
-  color: #38bdf8 !important;
-}
 
 
 .darklight-reference,
