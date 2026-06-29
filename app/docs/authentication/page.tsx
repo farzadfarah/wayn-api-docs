@@ -6,8 +6,12 @@ import { getApiMetadata } from "@/lib/openapi";
 
 export const dynamic = "force-dynamic";
 
-export default function AuthenticationPage() {
-  const api = getApiMetadata();
+export default async function AuthenticationPage(props: {
+  searchParams: Promise<{ doc?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const docId = searchParams.doc;
+  const api = await getApiMetadata(docId);
   const auth = api.docs.authentication;
   const notes = auth?.notes?.length
     ? auth.notes
@@ -23,11 +27,12 @@ export default function AuthenticationPage() {
             "Log request IDs and timestamps for troubleshooting, but keep authorization headers out of plain-text logs.",
         },
       ];
+  const docQuery = `?doc=${api.docId}`;
 
   return (
-    <DocsShell>
+    <DocsShell docId={api.docId}>
       <article className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">Authentication</p>
+        <p className="text-sm font-medium text-primary">Authentication ({api.title})</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">{auth?.title}</h1>
         <p className="mt-4 text-lg leading-8 text-muted-foreground">
           {auth?.description}
@@ -56,7 +61,7 @@ export default function AuthenticationPage() {
           ))}
         </div>
         <Link
-          href="/reference"
+          href={`/reference${docQuery}`}
           className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary"
         >
           Explore endpoints <ArrowRight className="h-4 w-4" />

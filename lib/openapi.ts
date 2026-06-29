@@ -2,6 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
 
+export type DocItem = {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+};
+
 type OpenApiOperation = {
   summary?: string;
   description?: string;
@@ -28,6 +35,9 @@ export type ApiEndpoint = {
 };
 
 export type ApiMetadata = {
+  docId: string;
+  specUrl: string;
+  docList: DocItem[];
   title: string;
   version: string;
   description: string;
@@ -114,6 +124,8 @@ const HTTP_METHODS = new Set([
   "options",
 ]);
 
+const INDEX_URL = "https://stsproddgtl01.blob.core.windows.net/cn-public/readme/index.json";
+
 function firstParagraph(value?: string) {
   return (
     value
@@ -132,10 +144,67 @@ function operationSummary(method: string, route: string, operation?: OpenApiOper
   );
 }
 
-export function getApiMetadata(): ApiMetadata {
-  const specPath = path.join(process.cwd(), "public", "openapi.yaml");
-  const source = fs.readFileSync(specPath, "utf8");
-  const document = parse(source) as OpenApiDocument;
+export async function getDocList(): Promise<DocItem[]> {
+  try {
+    const res = await fetch(INDEX_URL, { next: { revalidate: 3600 } });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data as DocItem[];
+      }
+    }
+  } catch (err) {
+    console.error(`Failed to fetch index.json from ${INDEX_URL}:`, err);
+  }
+
+  try {
+    const indexPath = path.join(process.cwd(), "public", "index.json");
+    if (fs.existsSync(indexPath)) {
+      const content = fs.readFileSync(indexPath, "utf8");
+      return JSON.parse(content) as DocItem[];
+    }
+  } catch (err) {
+    console.error("Failed to read fallback public/index.json", err);
+  }
+
+  return [
+    {
+      id: "wayn-1",
+      title: "WAYN API v1",
+      description: "WAYN API documentation v1",
+      url: "https://stsproddgtl01.blob.core.windows.net/cn-public/readme/wayn-1.yaml",
+    },
+  ];
+}
+
+export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
+  const docList = await getDocList();
+  const currentDoc = docList.find((d) => d.id === docId) ?? docList[0];
+
+  let source = "";
+  let specUrl = currentDoc.url;
+
+  if (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://")) {
+    try {
+      const res = await fetch(currentDoc.url, { next: { revalidate: 3600 } });
+      if (res.ok) {
+        source = await res.text();
+      }
+    } catch (err) {
+      console.error(`Error fetching spec from ${currentDoc.url}:`, err);
+    }
+  }
+
+  if (!source) {
+    const localFileName = currentDoc.url.startsWith("/") ? currentDoc.url : "/openapi.yaml";
+    const specPath = path.join(process.cwd(), "public", localFileName.replace(/^\//, ""));
+    if (fs.existsSync(specPath)) {
+      source = fs.readFileSync(specPath, "utf8");
+      specUrl = localFileName;
+    }
+  }
+
+  const document = (source ? parse(source) : {}) as OpenApiDocument;
 
   const endpoints = Object.entries(document.paths ?? {}).flatMap(([route, operations]) =>
     Object.entries(operations ?? {})
@@ -156,14 +225,17 @@ export function getApiMetadata(): ApiMetadata {
     endpoints.find((endpoint) => endpoint.method === "POST" && endpoint !== authEndpoint) ??
     endpoints.find((endpoint) => endpoint !== authEndpoint) ??
     endpoints[0];
-  const title = document.info?.title ?? "API Documentation";
+  const title = document.info?.title ?? currentDoc.title ?? "API Documentation";
   const version = document.info?.version ?? "latest";
-  const description = document.info?.description ?? "";
-  const shortDescription = firstParagraph(document.info?.description);
+  const description = document.info?.description ?? currentDoc.description ?? "";
+  const shortDescription = firstParagraph(document.info?.description ?? currentDoc.description);
   const serverUrl = document.servers?.find((server) => server.url)?.url ?? "https://api.example.com";
   const docs = document["x-docs"] ?? {};
 
   return {
+    docId: currentDoc.id,
+    specUrl,
+    docList,
     title,
     version,
     description,
@@ -180,8 +252,8 @@ export function getApiMetadata(): ApiMetadata {
         eyebrow: `${title} ${version}`,
         title,
         description: shortDescription,
-        primaryCta: { label: "Start integration", href: "/docs/getting-started" },
-        secondaryCta: { label: "Browse API reference", href: "/reference" },
+        primaryCta: { label: "Start integration", href: `/docs/getting-started?doc=${currentDoc.id}` },
+        secondaryCta: { label: "Browse API reference", href: `/reference?doc=${currentDoc.id}` },
         ...docs.hero,
       },
       overview: {

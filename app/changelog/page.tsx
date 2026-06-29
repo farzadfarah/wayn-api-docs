@@ -5,26 +5,30 @@ import { getApiMetadata } from "@/lib/openapi";
 
 export const dynamic = "force-dynamic";
 
-export default function ChangelogPage() {
-  const api = getApiMetadata();
+export default async function ChangelogPage(props: {
+  searchParams: Promise<{ doc?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const docId = searchParams.doc;
+  const api = await getApiMetadata(docId);
   const changes = api.docs.changelog?.length ? api.docs.changelog : [
     {
       version: api.version,
       title: `${api.title} specification loaded`,
-      description: `${api.endpoints.length} operations and ${api.tags.length || "no"} tags are currently available from /openapi.yaml.`,
+      description: `${api.endpoints.length} operations and ${api.tags.length || "no"} tags are currently available from the specification source.`,
     },
     {
       version: "OpenAPI",
       title: "Reference generated from source",
       description:
-        "The API Reference page embeds Scalar and reads the same public OpenAPI YAML file.",
+        "The API Reference page embeds Scalar and reads the OpenAPI YAML file.",
     },
   ];
 
   return (
-    <DocsShell>
+    <DocsShell docId={api.docId}>
       <article className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">Changelog</p>
+        <p className="text-sm font-medium text-primary">Changelog ({api.title})</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">What changed</h1>
         <p className="mt-4 text-lg leading-8 text-muted-foreground">
           Keep developers informed about API changes, documentation updates, and

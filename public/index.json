@@ -1,0 +1,14 @@
+[
+  {
+    "id": "wayn-1",
+    "title": "WAYN API v1",
+    "description": "Verify customer mobile numbers, retrieve delivery addresses and preferences, and send notifications through a secure partner API.",
+    "url": "https://stsproddgtl01.blob.core.windows.net/cn-public/readme/wayn-1.yaml"
+  },
+  {
+    "id": "wayn-2",
+    "title": "WAYN API v2",
+    "description": "Updated WAYN service API with enhanced endpoints, operations, and partner features.",
+    "url": "https://stsproddgtl01.blob.core.windows.net/cn-public/readme/wayn-2.yaml"
+  }
+]

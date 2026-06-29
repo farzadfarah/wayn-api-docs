@@ -6,13 +6,17 @@ import { getApiMetadata } from "@/lib/openapi";
 
 export const dynamic = "force-dynamic";
 
-export default function GettingStartedPage() {
-  const api = getApiMetadata();
+export default async function GettingStartedPage(props: {
+  searchParams: Promise<{ doc?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const docId = searchParams.doc;
+  const api = await getApiMetadata(docId);
   const guide = api.docs.gettingStarted;
   const fallbackSteps = [
     {
       title: "Configure the base URL",
-      description: "The primary server URL is taken from the first server entry in openapi.yaml.",
+      description: "The primary server URL is taken from the first server entry in the OpenAPI specification.",
       code: `API_BASE_URL=${api.serverUrl}`,
     },
     {
@@ -29,11 +33,12 @@ export default function GettingStartedPage() {
     },
   ];
   const steps = guide?.steps?.length ? guide.steps : fallbackSteps;
+  const docQuery = `?doc=${api.docId}`;
 
   return (
-    <DocsShell>
+    <DocsShell docId={api.docId}>
       <article className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">Getting Started</p>
+        <p className="text-sm font-medium text-primary">Getting Started ({api.title})</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">{guide?.title}</h1>
         <p className="mt-4 text-lg leading-8 text-muted-foreground">
           {guide?.description}
@@ -50,7 +55,7 @@ export default function GettingStartedPage() {
           ))}
         </div>
         <Link
-          href="/docs/authentication"
+          href={`/docs/authentication${docQuery}`}
           className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary"
         >
           Continue to authentication <ArrowRight className="h-4 w-4" />

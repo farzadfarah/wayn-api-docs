@@ -19,7 +19,7 @@ function getThemeSnapshot() {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-export function ApiReference() {
+export function ApiReference({ specUrl = "/openapi.yaml" }: { specUrl?: string }) {
   const colorMode = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => "light");
 
   return (
@@ -30,10 +30,10 @@ export function ApiReference() {
       )}
     >
       <ApiReferenceReact
-        key={colorMode}
+        key={`${colorMode}-${specUrl}`}
         configuration={
           {
-            url: "/openapi.yaml",
+            url: specUrl,
             hideModels: true,
             hideSearch: true,
             hideClientButton: true,
@@ -72,8 +72,6 @@ export function ApiReference() {
               clientKey: "fetch",
             },
             modelsSectionLabel: "Models",
-            slug: "api-1",
-            title: "API #1",
           } as any
         }
       />
