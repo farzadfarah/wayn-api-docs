@@ -19,7 +19,7 @@ function getThemeSnapshot() {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-export function ApiReference({ specUrl = "/openapi.yaml" }: { specUrl?: string }) {
+export function ApiReference({ specUrl = "" }: { specUrl?: string }) {
   const colorMode = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => "light");
 
   return (

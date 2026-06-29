@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import { parse } from "yaml";
 
 export type DocItem = {
@@ -146,7 +144,7 @@ function operationSummary(method: string, route: string, operation?: OpenApiOper
 
 export async function getDocList(): Promise<DocItem[]> {
   try {
-    const res = await fetch(INDEX_URL, { next: { revalidate: 3600 } });
+    const res = await fetch(INDEX_URL, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -157,24 +155,7 @@ export async function getDocList(): Promise<DocItem[]> {
     console.error(`Failed to fetch index.json from ${INDEX_URL}:`, err);
   }
 
-  try {
-    const indexPath = path.join(process.cwd(), "public", "index.json");
-    if (fs.existsSync(indexPath)) {
-      const content = fs.readFileSync(indexPath, "utf8");
-      return JSON.parse(content) as DocItem[];
-    }
-  } catch (err) {
-    console.error("Failed to read fallback public/index.json", err);
-  }
-
-  return [
-    {
-      id: "wayn-1",
-      title: "WAYN API v1",
-      description: "WAYN API documentation v1",
-      url: "https://stsproddgtl01.blob.core.windows.net/cn-public/readme/wayn-1.yaml",
-    },
-  ];
+  return [];
 }
 
 export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
@@ -182,25 +163,16 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
   const currentDoc = docList.find((d) => d.id === docId) ?? docList[0];
 
   let source = "";
-  let specUrl = currentDoc.url;
+  let specUrl = currentDoc?.url ?? "";
 
-  if (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://")) {
+  if (currentDoc?.url && (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://"))) {
     try {
-      const res = await fetch(currentDoc.url, { next: { revalidate: 3600 } });
+      const res = await fetch(currentDoc.url, { cache: "no-store" });
       if (res.ok) {
         source = await res.text();
       }
     } catch (err) {
       console.error(`Error fetching spec from ${currentDoc.url}:`, err);
-    }
-  }
-
-  if (!source) {
-    const localFileName = currentDoc.url.startsWith("/") ? currentDoc.url : "/openapi.yaml";
-    const specPath = path.join(process.cwd(), "public", localFileName.replace(/^\//, ""));
-    if (fs.existsSync(specPath)) {
-      source = fs.readFileSync(specPath, "utf8");
-      specUrl = localFileName;
     }
   }
 

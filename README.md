@@ -21,10 +21,4 @@ npm run start
 
 ## OpenAPI Source
 
-Scalar loads the API definition from:
-
-```text
-/openapi.yaml
-```
-
-The source file lives at `public/openapi.yaml`.
+The developer portal dynamically fetches the documentation index and OpenAPI specifications directly from remote storage (`https://stsproddgtl01.blob.core.windows.net/cn-public/readme/index.json`).
