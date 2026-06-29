@@ -27,6 +27,12 @@ export function NavbarClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const isHub = pathname === "/";
+  const displayTitle = isHub ? "7x" : title;
+  const displayLogoUrl = isHub
+    ? "https://stapps.blob.core.windows.net/cn-epgcms-stg/assets/logo_trademark_72e0639f5d.svg"
+    : logoUrl;
+
   const activeDocId = docId || searchParams.get("doc") || docList[0]?.id || "wayn-1";
   const docQuery = `?doc=${activeDocId}`;
 
@@ -42,24 +48,24 @@ export function NavbarClient({
   return (
     <header className="sticky top-0 z-40 bg-blue-600 dark:bg-slate-900 border-b border-blue-700 dark:border-slate-800 text-white shadow-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <MobileNav title={title} />
+        <MobileNav title={displayTitle} />
         
         <Link href="/" className="flex shrink-0 items-center gap-2.5 font-bold text-white hover:opacity-90 transition-opacity">
-          {logoUrl ? (
+          {displayLogoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={logoUrl} alt={title} className="h-7 w-auto object-contain bg-white/10 p-1 rounded" />
+            <img src={displayLogoUrl} alt={displayTitle} className="h-7 w-auto object-contain bg-white/10 p-1 rounded" />
           ) : (
             <span className="grid h-7 w-7 place-items-center rounded bg-white/20 font-mono text-xs font-black tracking-wider text-white">
-              AYN
+              {displayTitle.slice(0, 3).toUpperCase()}
             </span>
           )}
-          <span className="truncate text-base font-bold tracking-tight">{title}</span>
+          <span className="truncate text-base font-bold tracking-tight">{displayTitle}</span>
         </Link>
 
         {docList.length > 0 && (
           <div className="relative flex items-center ml-2">
             <select
-              value={pathname === "/" ? "hub" : activeDocId}
+              value={isHub ? "hub" : activeDocId}
               onChange={handleDocChange}
               className="appearance-none bg-white/15 hover:bg-white/25 text-white text-xs font-semibold py-1.5 pl-3 pr-7 rounded-md cursor-pointer border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
             >
@@ -76,9 +82,11 @@ export function NavbarClient({
           </div>
         )}
 
-        <span className="hidden rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-medium text-white/90 sm:inline-block">
-          {version}
-        </span>
+        {!isHub && (
+          <span className="hidden rounded bg-white/20 px-2 py-0.5 font-mono text-xs font-medium text-white/90 sm:inline-block">
+            {version}
+          </span>
+        )}
 
         <nav className="hidden items-center gap-1.5 md:flex ml-2">
           <Link
