@@ -1,0 +1,711 @@
+openapi: 3.0.1
+info:
+  title: WAYN API
+  version: v1
+  description: |
+    Welcome!
+    WAYN Integration Overview
+    This API enables trusted partners to verify mobile numbers, retrieve delivery addresses and preferences, and send notifications to customers. It is designed to be secure, reliable, and easy to integrate so teams can reduce manual work and improve delivery accuracy.
+
+    This page contains integration resources, examples, and support to help you start the integration process.
+
+servers:
+  - url: https://api-stg.wayn.ae/api/v1
+    description: Staging base URL
+
+x-docs:
+  logoUrl: https://files.readme.io/75d6744fa4b34dfb73861893e3d774c6e20bde16babeaf2ce9a0c7eb0532845e-waynlandinglogo.svg
+  hero:
+    eyebrow: WAYN API v1
+    title: WAYN API
+    description: Verify customer mobile numbers, retrieve delivery addresses and preferences, and send notifications through a secure partner API.
+    primaryCta:
+      label: Start integration
+      href: /docs/getting-started
+    secondaryCta:
+      label: Browse API reference
+      href: /reference
+  overview:
+    eyebrow: Getting Started
+    title: Overview
+    sections:
+      - id: welcome
+        title: Welcome to the WAYN API Developer Hub
+        body: |
+          Your central platform for integrating with WAYN's suite of APIs. This hub provides all the tools, documentation, and resources developers need to seamlessly connect applications with WAYN's services, enabling smooth last-mile delivery operations between senders and receivers.
+      - id: key-features
+        title: Key Features
+        items:
+          - label: Authentication API
+            endpoint: POST /auth/authenticate
+            description: Securely authenticate and gain access to WAYN services.
+          - label: User Validation API
+            endpoint: POST /ext/verify
+            description: Verify and validate user information within the WAYN ecosystem.
+          - label: Address Preference API
+            endpoint: POST /ext/reach
+            description: Check and manage customer address preferences for accurate deliveries.
+          - label: Notification API
+            endpoint: POST /ext/notify
+            description: Send notifications to customers via WAYN to keep them informed about their deliveries.
+      - id: benefits
+        title: Benefits
+        items:
+          - description: Reduce manual processes and errors.
+          - description: Improve delivery accuracy and customer experience.
+          - description: Accelerate time-to-integration.
+      - id: best-practices
+        title: Best Practices
+        body: |
+          Use secure credential storage, send valid JSON with Content-Type application/json, allow unknown response fields for forward compatibility, and retry rate-limited requests with exponential backoff and jitter.
+      - id: response-object
+        title: Standard API Response Object
+        body: |
+          All API responses use a consistent envelope with status, message, data, errors, correlationId, and timestamp fields so integrations can handle results consistently across endpoints.
+  gettingStarted:
+    title: Start your WAYN integration
+    description: Request partner access, configure the staging base URL, authenticate, and make your first verification request.
+    steps:
+      - title: Request partner access
+        description: Request credentials from your WAYN account owner and keep your integration guide and support contact handy.
+        code: WAYN_BASE_URL=https://api-stg.wayn.ae/api/v1
+      - title: Authenticate
+        description: Use the authentication endpoint to obtain a token for protected requests.
+        code: WAYN_TOKEN=your_access_token
+      - title: Verify mobile numbers
+        description: Send a verification request with one or more customer mobile numbers.
+        code: |
+          curl "$WAYN_BASE_URL/ext/verify" \
+            -H "Authorization: Bearer $WAYN_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"mobileNumbers":["971529694603","971501493961"]}'
+  authentication:
+    title: Authenticate WAYN API requests
+    description: Use OAuth 2.0 Client Credentials to obtain a short-lived access token, then send that token with protected Verify, Reach, and Notify requests.
+    headerExample: "Authorization: Bearer YOUR_WAYN_ACCESS_TOKEN"
+    notes:
+      - title: Partner systems
+        description: Call WAYN from trusted backend systems only. Do not expose partner credentials or access tokens in browser bundles.
+      - title: Operational support
+        description: Log correlation IDs and timestamps for troubleshooting, but keep authorization headers and customer data out of plain-text logs.
+  changelog:
+    - version: "2026.06"
+      title: Developer portal launch
+      description: Added guided docs, authentication notes, and Scalar-powered API reference.
+    - version: "2026.05"
+      title: OpenAPI source refreshed
+      description: Updated endpoint descriptions, schemas, and example payloads from the YAML spec.
+
+paths:
+  /auth/authenticate:
+    post:
+      tags:
+        - Public
+      summary: Authenticate
+      description: |
+        This endpoint implements OAuth 2.0 Client Credentials flow for machine-to-machine authentication.
+        Upon successful authentication, a JWT token is returned which must be included in the Authorization
+        header of all subsequent API requests.
+      # No path-level version parameter required since server URL includes api/v1
+      requestBody:
+        description: The authentication request containing client ID and client secret.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequestDto'
+            example:
+              clientId: "test"
+              clientSecret: "test"
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequestDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequestDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateRequestDto'
+      responses:
+        '200':
+          description: Returns the JWT access token with token type and expiration time in seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticateResponseDto'
+              example:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJURVNUIiwianRpIjoiNGIxZWU2NGUtYmVmMS00YjczLTgzMTQtYjVhMDY2Y2QxZjk1IiwiZXhwIjoxNzY3Nzc4NjgwLCJpc3MiOiJXQVlOLkFQSSIsImF1ZCI6IldBWU4uQ2xpZW50cyJ9.ShTBvXVh-RjOAucrUomGfykiXuT7fASp5Jo5K9_W-Co"
+                tokenType: "bearer"
+                expiresIn: 3600
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AuthenticateResponseDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticateResponseDto'
+        '401':
+          description: Invalid client credentials - check your clientId and clientSecret
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+              example:
+                status: "Error"
+                message: "Invalid client_id or client_secret."
+                data: null
+                errors:
+                  - code: "INVALID_CREDENTIALS"
+                    message: "Invalid client_id or client_secret."
+                    field: null
+                correlationId: "93987ede-e0d7-4bd8-838b-216c92e73783"
+                timestamp: "2026-01-16T10:23:38.4928049Z"
+        '500':
+          description: Internal Server Error
+
+  /ext/verify:
+    post:
+      tags:
+        - Public
+      summary: Verify
+      description: |
+        Verifies whether the provided mobile numbers are registered and active in the system.
+        This endpoint requires Bearer (JWT) authentication obtained from `/auth/authenticate`.
+
+        Behavior:
+          - Normalizes input mobile numbers to digits-only form (removes leading `+`, `00` or local `0`).
+          - Performs a single batch check and returns two lists: `foundNumbers` and `notFoundNumbers`.
+
+        Limits & validation:
+          - Maximum 100 mobile numbers per request.
+          - `mobileNumbers` cannot be null or empty.
+          - Mobile number format validated by the API validator; validation failures return `VALIDATION_ERROR`.
+
+        Common error codes: `INVALID_PAYLOAD`, `EMPTY_MOBILE_NUMBERS`, `MAX_ITEMS_EXCEEDED`, `VALIDATION_ERROR`, `MOBILE_NUMBERS_NOT_FOUND`, `DB_VERIFICATION_ERROR`.
+      security:
+        - Bearer: []
+      # No path-level version parameter required since server URL includes api/v1
+      requestBody:
+        description: The verification request containing a list of mobile numbers to verify.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyDto'
+            examples:
+              verifyRequest:
+                summary: Verify mobile numbers
+                value:
+                  mobileNumbers: ["971529694603", "971501493961"]
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/VerifyDto'
+      responses:
+        '200':
+          description: Verification successful. Returns lists of found and not found mobile numbers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyDtoResponseDto'
+              examples:
+                verifySuccess:
+                  summary: Successful verification
+                  value:
+                    status: "Success"
+                    message: "Verified successfully. 1 out of 2 mobile numbers found."
+                    data:
+                      foundNumbers: ["971529694603"]
+                      notFoundNumbers: ["971501493961"]
+                    errors: null
+                    correlationId: "4cf0d752-a4e7-4164-b5a0-a604a7ef596f"
+                    timestamp: "2026-01-16T10:24:23.5407105Z"
+        '400':
+          description: Bad Request (validation or payload errors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '500':
+          description: Internal Server Error
+
+  /ext/reach:
+    post:
+      tags:
+        - Public
+      summary: Reach
+      description: |
+        Retrieves all delivery addresses and customer delivery preferences for the specified mobile numbers.
+        This endpoint requires Bearer (JWT) authentication obtained from `/auth/authenticate`.
+
+        Behavior:
+          - Normalizes input mobile numbers to digits-only form (removes leading `+`, `00` or local `0`).
+          - Returns a dictionary mapping each mobile number to an array of `Address` objects.
+          - Each address includes coordinates, building and apartment details, address label and delivery preferences.
+
+        Limits & validation:
+          - Maximum 100 mobile numbers per request.
+          - `mobileNumbers` cannot be null or empty.
+          - Mobile number format validated by the API validator; validation failures return `VALIDATION_ERROR`.
+
+        Common error codes: `INVALID_PAYLOAD`, `EMPTY_MOBILE_NUMBERS`, `MAX_ITEMS_EXCEEDED`, `VALIDATION_ERROR`, `ADDRESSES_NOT_FOUND`, `DB_REACH_ERROR`.
+      security:
+        - Bearer: []
+      # No path-level version parameter required since server URL includes api/v1
+      requestBody:
+        description: The reach request containing a list of mobile numbers to retrieve addresses for.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReachDto'
+            examples:
+              reachRequest:
+                summary: Reach request example
+                value:
+                  mobileNumbers: ["971529694603", "971501493961"]
+      responses:
+        '200':
+          description: Request successful. Returns mapping of mobile numbers to address lists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelopeAddressMap'
+              examples:
+                reachSuccess:
+                  summary: Reach response example
+                  value:
+                    status: "Success"
+                    message: "Reach request processed successfully. Retrieved addresses for 1 mobile numbers."
+                    data:
+                      "971529694603":
+                        - id: 10
+                          area: "Qusais 1"
+                          emirate: "Dubai"
+                          latitude: 25.2727302
+                          longitude: 55.3733848
+                          type: "0"
+                          buildingName: "talal"
+                          apartmentNo: "101"
+                          floor: "1"
+                          street: "-24-doha"
+                          additionalDirections: "left"
+                          mobileNumberPrefix: "+971"
+                          mobileNumber: "971552845787"
+                          addressLabel: "Home"
+                          house: "talal"
+                          company: ""
+                          isTemporary: false
+                          isDefault: false
+                          preferences:
+                            - days: ["Sunday", "Monday", "Saturday"]
+                              deliveryIntentions: ["Personal", "Bank"]
+                              fromTime: "09:00:00"
+                              toTime: "17:00:00"
+                              noContactDelivery: true
+                              keepAtDoorStep: false
+                              dontRingBell: false
+                        - id: 12
+                          area: "Garhoud"
+                          emirate: "Dubai"
+                          latitude: 25.2373421
+                          longitude: 55.3583388
+                          type: "0"
+                          buildingName: "abc"
+                          apartmentNo: "230"
+                          floor: "2"
+                          street: "56 Street-7-"
+                          additionalDirections: ""
+                          mobileNumberPrefix: "+971"
+                          mobileNumber: "971552845787"
+                          addressLabel: "Annys home"
+                          house: "abc"
+                          company: ""
+                          isTemporary: false
+                          isDefault: false
+                          preferences: []
+        '400':
+          description: Bad Request (validation errors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '500':
+          description: Internal Server Error
+
+  /ext/notify:
+    post:
+      tags:
+        - Public
+      summary: Notify
+      description: |
+        Sends a notification to the user using their Emirates Id or phone number.
+        This endpoint requires Bearer (JWT) authentication obtained from `/auth/authenticate`.
+
+        Behavior & rules:
+          - Request must include `from`, `to`, `subject` and at least one of `text` or `html`.
+          - Recipient (`to`) can be any special receiver codes (trade license `tr...`, contract `ca...`, phone number of 12 digits, Emirates ID `784` + 12 digits, or ERN of 19 alphanumeric characters). Invalid formats return `INVALID_RECIPIENT_ADDRESS`.
+          - Attachments are provided as public URLs; up to 5 attachments are allowed and each must be <= 10MB.
+
+        Validation & errors:
+          - Attachment entries require `filename` and a valid HTTP/HTTPS `url`.
+          - Common error codes: `INVALID_PAYLOAD`, `VALIDATION_ERROR`, `SENDER_NOT_ALLOWED`, `RECEIVER_DOMAIN_NOT_ALLOWED`, `INVALID_RECIPIENT_ADDRESS`, `EMAIL_SEND_FAILED`, `SENDER_VALIDATION_ERROR`, `EMAIL_SEND_ERROR`.
+
+        On success the endpoint returns a confirmation including `to`, `subject` and an `eventId` for the published email event.
+      security:
+        - Bearer: []
+      # No path-level version parameter required since server URL includes api/v1
+      requestBody:
+        description: The email request containing sender, recipient, subject, content, and optional attachments.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailRequest'
+            examples:
+              sendEmailRequest:
+                summary: Sample email request with attachment
+                value:
+                  from: "email@7x.ae"
+                  to: "784198683480408@wayn.ae"
+                  subject: "Hello Welcome to Wayn"
+                  text: "Dear Customer"
+                  html: "Welcome to Wayn App"
+                  attachments:
+                    - url: "https://7x.ae/1.xlsx"
+                      filename: "Demo.xlsx"
+      responses:
+        '200':
+          description: Email sent successfully. Returns recipient and subject confirmation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+              examples:
+                emailSuccess:
+                  summary: Email processed
+                  value:
+                    status: "Success"
+                    message: "Email received and processed successfully."
+                    data:
+                      to: "784198683480408@wayn.ae"
+                      subject: "Hello Welcome to Wayn"
+                      eventId: "56d511b4-e67c-4a79-8faf-05ea15016020"
+                    errors: null
+                    correlationId: "94403622-78f5-43ef-87b5-433b69647663"
+                    timestamp: "2026-01-16T10:27:04.2349808Z"
+        '400':
+          description: Bad Request (validation or sender errors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponseDto'
+        '500':
+          description: Internal Server Error
+
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Please enter into field the word 'Bearer' followed by a space and the JWT value."
+
+  schemas:
+    ErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+      additionalProperties: false
+
+    ResponseEnvelopeAddressMap:
+      type: object
+      description: Generic response envelope containing a mapping from string keys to lists of addresses. Use this as the contract for the reach endpoint where keys are mobile numbers.
+      properties:
+        status:
+          type: string
+          description: Response status, e.g. "Success" or "Error"
+        message:
+          type: string
+          description: Human-readable message providing details about the response
+        data:
+          type: object
+          description: A dictionary where each property name is a string key (typically a mobile number) and the value is an array of AddressDto
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/AddressDto'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDto'
+        correlationId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    ObjectResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDto'
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    AuthenticateRequestDto:
+      type: object
+      properties:
+        clientId:
+          type: string
+          nullable: true
+        clientSecret:
+          type: string
+          nullable: true
+      additionalProperties: false
+
+    AuthenticateResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: true
+        tokenType:
+          type: string
+          nullable: true
+        expiresIn:
+          type: integer
+          format: int32
+      additionalProperties: false
+
+    VerifyDto:
+      type: object
+      properties:
+        mobileNumbers:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+
+    ReachDto:
+      type: object
+      properties:
+        mobileNumbers:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+
+    VerifyDtoResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        data:
+          $ref: '#/components/schemas/VerifyDto'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDto'
+        correlationId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    AddressPreferencesDto:
+      type: object
+      properties:
+        days:
+          type: array
+          items:
+            type: string
+        deliveryIntentions:
+          type: array
+          items:
+            type: string
+        fromTime:
+          type: string
+        toTime:
+          type: string
+        noContactDelivery:
+          type: boolean
+        keepAtDoorStep:
+          type: boolean
+        dontRingBell:
+          type: boolean
+      additionalProperties: false
+
+    AddressDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        area:
+          type: string
+          nullable: true
+        emirate:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        buildingName:
+          type: string
+          nullable: true
+        apartmentNo:
+          type: string
+          nullable: true
+        floor:
+          type: string
+          nullable: true
+        street:
+          type: string
+          nullable: true
+        additionalDirections:
+          type: string
+          nullable: true
+        mobileNumberPrefix:
+          type: string
+          nullable: true
+        mobileNumber:
+          type: string
+          nullable: true
+        addressLabel:
+          type: string
+          nullable: true
+        house:
+          type: string
+          nullable: true
+        company:
+          type: string
+          nullable: true
+        isTemporary:
+          type: boolean
+        isDefault:
+          type: boolean
+        preferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressPreferencesDto'
+      additionalProperties: false
+
+    AddressDtoListResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressDto'
+          nullable: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDto'
+        correlationId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    # StringAddressDtoListDictionaryResponseDto removed (unused) - kept previously for internal mapping responses
+
+    EmailAttachmentRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+      additionalProperties: false
+
+    SendEmailRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          nullable: true
+        to:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        text:
+          type: string
+          nullable: true
+        html:
+          type: string
+          nullable: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAttachmentRequest'
+      additionalProperties: false
+
+

@@ -1,26 +1,115 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbfbfa;
+  --foreground: #151719;
+  --card: #ffffff;
+  --card-foreground: #151719;
+  --muted: #f0f1ed;
+  --muted-foreground: #676d75;
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+  --secondary: #eef6f4;
+  --secondary-foreground: #115e59;
+  --accent: #f4f0e8;
+  --accent-foreground: #3d3428;
+  --border: #deded8;
+  --input: #deded8;
+  --ring: #0f766e;
+  --radius: 0.5rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.25);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #111311;
+  --foreground: #f4f5f2;
+  --card: #171a18;
+  --card-foreground: #f4f5f2;
+  --muted: #20241f;
+  --muted-foreground: #a2aaa2;
+  --primary: #2dd4bf;
+  --primary-foreground: #06211e;
+  --secondary: #17332f;
+  --secondary-foreground: #b9f7ed;
+  --accent: #2d281f;
+  --accent-foreground: #f1dfbd;
+  --border: #2d322e;
+  --input: #2d322e;
+  --ring: #2dd4bf;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--primary) 28%, transparent);
+}
+
+.scalar-app {
+  --scalar-radius: 8px;
+  --scalar-background-1: var(--card);
+  --scalar-background-2: var(--muted);
+  --scalar-background-3: var(--border);
+  --scalar-color-1: var(--foreground);
+  --scalar-color-2: var(--muted-foreground);
+  --scalar-color-3: var(--muted-foreground);
+  --scalar-color-accent: var(--primary);
+  --scalar-background-accent: color-mix(in oklab, var(--primary) 15%, transparent);
+  --scalar-border-color: var(--border);
+  --scalar-sidebar-background-1: var(--card);
+  --scalar-sidebar-color-1: var(--foreground);
+  --scalar-sidebar-color-2: var(--muted-foreground);
+  --scalar-sidebar-border-color: var(--border);
+  --scalar-sidebar-item-hover-background: var(--muted);
+  --scalar-sidebar-item-active-background: var(--secondary);
+  --scalar-sidebar-color-active: var(--secondary-foreground);
+  --scalar-sidebar-search-background: var(--muted);
+  --scalar-sidebar-search-border-color: var(--border);
+}
+
+.dark .scalar-app {
+  color-scheme: dark;
+  --scalar-background-1: var(--card);
+  --scalar-background-2: var(--muted);
+  --scalar-background-3: var(--border);
+  --scalar-color-1: var(--foreground);
+  --scalar-color-2: var(--muted-foreground);
+  --scalar-color-3: var(--muted-foreground);
+  --scalar-color-accent: var(--primary);
+  --scalar-background-accent: color-mix(in oklab, var(--primary) 17%, transparent);
+  --scalar-border-color: var(--border);
+  --scalar-sidebar-background-1: var(--card);
+  --scalar-sidebar-color-1: var(--foreground);
+  --scalar-sidebar-color-2: var(--muted-foreground);
+  --scalar-sidebar-border-color: var(--border);
+  --scalar-sidebar-item-hover-background: var(--muted);
+  --scalar-sidebar-item-active-background: var(--secondary);
+  --scalar-sidebar-color-active: var(--secondary-foreground);
+  --scalar-sidebar-search-background: var(--muted);
+  --scalar-sidebar-search-border-color: var(--border);
 }

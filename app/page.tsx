@@ -1,65 +1,115 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { DocsShell } from "@/components/docs-shell";
+import { Badge } from "@/components/ui/badge";
+import { getApiMetadata } from "@/lib/openapi";
+
+export const dynamic = "force-dynamic";
+
+function SectionBody({ body }: { body?: string }) {
+  if (!body) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4">
+      {body.split(/\n\s*\n/).map((paragraph) => (
+        <p key={paragraph} className="text-sm leading-7 text-foreground/90">
+          {paragraph.trim()}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
+  const api = getApiMetadata();
+  const overview = api.docs.overview;
+  const hero = api.docs.hero;
+  const sections = overview?.sections ?? [];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <DocsShell>
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_220px]">
+        <article className="min-w-0 max-w-4xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+            {overview?.eyebrow}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight">{overview?.title}</h1>
+          <div className="mt-8 border-t border-border pt-8">
+            <div className="rounded-lg border border-border bg-card p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge>{hero?.eyebrow}</Badge>
+                <span className="font-mono text-xs text-muted-foreground">{api.endpoints.length} operations</span>
+              </div>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">{hero?.description}</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href={hero?.primaryCta?.href ?? "/docs/getting-started"}
+                  className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-90"
+                >
+                  {hero?.primaryCta?.label ?? "Start integration"} <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href={hero?.secondaryCta?.href ?? "/reference"}
+                  className="inline-flex h-9 items-center rounded-md border border-border px-3 text-sm font-medium hover:bg-muted"
+                >
+                  {hero?.secondaryCta?.label ?? "Browse API reference"}
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 space-y-10">
+            {sections.map((section) => (
+              <section key={section.id} id={section.id} className="scroll-mt-24">
+                <h2 className="text-xl font-semibold tracking-tight">{section.title}</h2>
+                <div className="mt-4">
+                  <SectionBody body={section.body} />
+                  {section.items?.length ? (
+                    <ul className="mt-4 space-y-3 text-sm leading-7">
+                      {section.items.map((item) => (
+                        <li key={`${item.label ?? item.description}-${item.endpoint ?? ""}`} className="flex gap-3">
+                          <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                          <span>
+                            {item.label ? <span className="font-medium">{item.label}</span> : null}
+                            {item.endpoint ? (
+                              <code className="mx-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">
+                                {item.endpoint}
+                              </code>
+                            ) : null}
+                            {item.label || item.endpoint ? <span className="text-muted-foreground">- </span> : null}
+                            <span className="text-foreground/90">{item.description}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </section>
+            ))}
+          </div>
+        </article>
+
+        <aside className="hidden xl:block">
+          <div className="sticky top-24 border-l border-border pl-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              On This Page
+            </p>
+            <nav className="space-y-1">
+              {sections.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="block rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  {section.title}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </aside>
+      </div>
+    </DocsShell>
   );
 }
