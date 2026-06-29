@@ -78,8 +78,8 @@ body {
   --scalar-color-1: var(--foreground);
   --scalar-color-2: var(--muted-foreground);
   --scalar-color-3: var(--muted-foreground);
-  --scalar-color-accent: var(--primary);
-  --scalar-background-accent: color-mix(in oklab, var(--primary) 15%, transparent);
+  --scalar-color-accent: #2563eb;
+  --scalar-background-accent: rgba(37, 99, 235, 0.12);
   --scalar-border-color: var(--border);
   --scalar-sidebar-background-1: var(--card);
   --scalar-sidebar-color-1: var(--foreground);
@@ -94,24 +94,51 @@ body {
 
 .dark .scalar-app {
   color-scheme: dark;
-  --scalar-background-1: var(--card);
-  --scalar-background-2: var(--muted);
-  --scalar-background-3: var(--border);
-  --scalar-color-1: var(--foreground);
-  --scalar-color-2: var(--muted-foreground);
-  --scalar-color-3: var(--muted-foreground);
-  --scalar-color-accent: var(--primary);
-  --scalar-background-accent: color-mix(in oklab, var(--primary) 17%, transparent);
-  --scalar-border-color: var(--border);
-  --scalar-sidebar-background-1: var(--card);
-  --scalar-sidebar-color-1: var(--foreground);
-  --scalar-sidebar-color-2: var(--muted-foreground);
-  --scalar-sidebar-border-color: var(--border);
-  --scalar-sidebar-item-hover-background: var(--muted);
-  --scalar-sidebar-item-active-background: var(--secondary);
-  --scalar-sidebar-color-active: var(--secondary-foreground);
-  --scalar-sidebar-search-background: var(--muted);
-  --scalar-sidebar-search-border-color: var(--border);
+  --scalar-background-1: #0b0f17;
+  --scalar-background-2: #111827;
+  --scalar-background-3: #1f2937;
+  --scalar-color-1: #f3f4f6;
+  --scalar-color-2: #9ca3af;
+  --scalar-color-3: #6b7280;
+  --scalar-color-accent: #3b82f6;
+  --scalar-background-accent: rgba(59, 130, 246, 0.18);
+  --scalar-border-color: #1f2937;
+  --scalar-sidebar-background-1: #0b0f17;
+  --scalar-sidebar-color-1: #f3f4f6;
+  --scalar-sidebar-color-2: #9ca3af;
+  --scalar-sidebar-border-color: #1f2937;
+  --scalar-sidebar-item-hover-background: #111827;
+  --scalar-sidebar-item-active-background: #1e293b;
+  --scalar-sidebar-color-active: #60a5fa;
+  --scalar-sidebar-search-background: #111827;
+  --scalar-sidebar-search-border-color: #1f2937;
+}
+
+/* Custom styling to match ReadMe API Playground aesthetics */
+.scalar-app [class*="scalar-card"],
+.scalar-app [class*="card"],
+.scalar-app [class*="section"] {
+  border-radius: 10px !important;
+}
+
+.scalar-app button[type="submit"],
+.scalar-app [class*="send-button"],
+.scalar-app [class*="try-it"],
+.scalar-app .scalar-button-primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+}
+
+.scalar-app button[type="submit"]:hover,
+.scalar-app [class*="send-button"]:hover,
+.scalar-app [class*="try-it"]:hover,
+.scalar-app .scalar-button-primary:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
 }
 
 .darklight-reference,
