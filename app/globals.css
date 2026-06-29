@@ -115,30 +115,53 @@ body {
 }
 
 /* Custom styling to match ReadMe API Playground aesthetics */
-.scalar-app [class*="scalar-card"],
-.scalar-app [class*="card"],
-.scalar-app [class*="section"] {
+html body .scalar-app,
+html body [class*="scalar"] {
+  --scalar-radius: 8px !important;
+  --scalar-radius-lg: 10px !important;
+  --scalar-color-accent: #2563eb !important;
+  --scalar-background-accent: rgba(37, 99, 235, 0.15) !important;
+}
+
+html body.dark .scalar-app,
+html body .dark .scalar-app,
+html body [class*="dark"] [class*="scalar"] {
+  --scalar-background-1: #0b0f17 !important;
+  --scalar-background-2: #111827 !important;
+  --scalar-background-3: #1f2937 !important;
+  --scalar-color-1: #f3f4f6 !important;
+  --scalar-color-2: #9ca3af !important;
+  --scalar-color-3: #6b7280 !important;
+  --scalar-color-accent: #3b82f6 !important;
+  --scalar-background-accent: rgba(59, 130, 246, 0.18) !important;
+  --scalar-border-color: #1f2937 !important;
+}
+
+html body .scalar-app [class*="scalar-card"],
+html body .scalar-app [class*="card"],
+html body .scalar-app [class*="section"],
+html body .scalar-app [class*="playground"] {
   border-radius: 10px !important;
 }
 
-.scalar-app button[type="submit"],
-.scalar-app [class*="send-button"],
-.scalar-app [class*="try-it"],
-.scalar-app .scalar-button-primary {
+html body .scalar-app button[type="submit"],
+html body .scalar-app [class*="send-button"],
+html body .scalar-app [class*="try-it"],
+html body .scalar-app .scalar-button-primary {
   background-color: #2563eb !important;
   color: #ffffff !important;
   font-weight: 600 !important;
   border-radius: 8px !important;
   border: none !important;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25) !important;
 }
 
-.scalar-app button[type="submit"]:hover,
-.scalar-app [class*="send-button"]:hover,
-.scalar-app [class*="try-it"]:hover,
-.scalar-app .scalar-button-primary:hover {
+html body .scalar-app button[type="submit"]:hover,
+html body .scalar-app [class*="send-button"]:hover,
+html body .scalar-app [class*="try-it"]:hover,
+html body .scalar-app .scalar-button-primary:hover {
   background-color: #1d4ed8 !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
 }
 
 .darklight-reference,

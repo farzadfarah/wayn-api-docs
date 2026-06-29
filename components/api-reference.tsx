@@ -40,8 +40,28 @@ export function ApiReference({ specUrl = "/openapi.yaml" }: { specUrl?: string }
             showSidebar: true,
             showDeveloperTools: "localhost",
             showToolbar: "localhost",
-            operationTitleSource: "summary",
-            theme: colorMode === "dark" ? "moon" : "default",
+            theme: "none",
+            customCss: `
+              .scalar-app {
+                --scalar-radius: 8px !important;
+                --scalar-color-accent: #2563eb !important;
+              }
+              .dark .scalar-app, .scalar-app.dark-mode {
+                --scalar-background-1: #0b0f17 !important;
+                --scalar-background-2: #111827 !important;
+                --scalar-background-3: #1f2937 !important;
+                --scalar-color-1: #f3f4f6 !important;
+                --scalar-color-2: #9ca3af !important;
+                --scalar-color-accent: #3b82f6 !important;
+                --scalar-border-color: #1f2937 !important;
+              }
+              button[type="submit"], [class*="send-button"], [class*="try-it"], .scalar-button-primary {
+                background-color: #2563eb !important;
+                color: #ffffff !important;
+                font-weight: 600 !important;
+                border-radius: 8px !important;
+              }
+            `,
             persistAuth: false,
             proxyUrl: "https://proxy.scalar.com",
             externalUrls: {
