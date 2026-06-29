@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Code2, BookOpen, Layers, ChevronDown, Search } from "lucide-react";
-import { useSearchContext } from "fumadocs-ui/contexts/search";
+import { Code2, BookOpen, Layers, ChevronDown } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -27,7 +26,6 @@ export function NavbarClient({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setOpenSearch } = useSearchContext();
 
   const isHub = pathname === "/";
   const mainLogoUrl = "https://stapps.blob.core.windows.net/cn-epgcms-stg/assets/logo_trademark_72e0639f5d.svg";
@@ -136,19 +134,6 @@ export function NavbarClient({
         </nav>
 
         <div className="ml-auto md:ml-0 flex items-center gap-2">
-          {/* Fumadocs Search Trigger */}
-          <button
-            onClick={() => setOpenSearch(true)}
-            className="flex items-center gap-2 rounded-md bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-medium text-white/90 transition-colors"
-            title="Search docs (Cmd+K)"
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Search...</span>
-            <kbd className="hidden lg:inline-block rounded bg-white/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
-              ⌘K
-            </kbd>
-          </button>
-
           <ThemeToggle className="bg-white/10 hover:bg-white/20 text-white hover:text-white border border-white/10" />
         </div>
       </div>
