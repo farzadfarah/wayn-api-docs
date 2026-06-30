@@ -7,6 +7,7 @@ export type DocItem = {
   url: string;
   category?: string;
   logoUrl?: string;
+  logourl?: string;
 };
 
 type OpenApiOperation = {
@@ -174,10 +175,14 @@ export async function getDocList(): Promise<DocItem[]> {
               flattened.push({
                 ...item,
                 category: entry.category,
+                logoUrl: item.logoUrl || item.logourl,
               });
             }
           } else {
-            flattened.push(entry);
+            flattened.push({
+              ...entry,
+              logoUrl: entry.logoUrl || entry.logourl,
+            });
           }
         }
         return [...localDocs, ...flattened];
