@@ -263,10 +263,14 @@ export function DocsLayoutClient({
                         : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
-                    <span className="truncate flex-1 text-[11.5px]">{ep.summary}</span>
+                    <span className="truncate flex-1 text-[11.5px]">
+                      {ep.summary.toLowerCase().startsWith(ep.method.toLowerCase() + " ")
+                        ? ep.summary.slice(ep.method.length + 1)
+                        : ep.summary}
+                    </span>
                     <span
                       className={cn(
-                        "text-[9.5px] font-bold uppercase tracking-wider shrink-0 font-mono transition-colors",
+                        "text-[11px] font-bold uppercase tracking-wider shrink-0 font-mono transition-colors",
                         color.text,
                       )}
                     >

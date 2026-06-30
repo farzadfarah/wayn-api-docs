@@ -92,10 +92,14 @@ export function Sidebar({
                   href="/reference"
                   className="flex items-center justify-between rounded-md px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
-                  <span className="truncate font-medium">{endpoint.summary}</span>
+                  <span className="truncate font-medium">
+                    {endpoint.summary.toLowerCase().startsWith(endpoint.method.toLowerCase() + " ")
+                      ? endpoint.summary.slice(endpoint.method.length + 1)
+                      : endpoint.summary}
+                  </span>
                   <span
                     className={cn(
-                      "ml-2 shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-wider transition-colors",
+                      "ml-2 shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors",
                       getMethodBadgeColor(endpoint.method),
                     )}
                   >
