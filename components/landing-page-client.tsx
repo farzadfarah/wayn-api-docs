@@ -123,7 +123,7 @@ export function LandingPageClient({ initialCategories }: LandingPageClientProps)
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           {logoUrl ? (
-                            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-white dark:bg-slate-900 p-1.5 shadow-xs transition-colors group-hover:border-primary/30">
+                            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center transition-colors">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={logoUrl} alt={title} className="h-full w-full object-contain" />
                             </div>
