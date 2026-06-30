@@ -5,16 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   BookOpen,
-  Code2,
-  FileText,
   Layers,
   Search,
   ChevronDown,
-  Sparkles,
   KeyRound,
   History,
   Rocket,
-  PanelLeft,
+  Menu,
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -24,27 +21,27 @@ import type { ApiMetadata, ApiEndpoint } from "@/lib/openapi";
 const methodColors: Record<string, { bg: string; text: string; border: string }> = {
   GET: {
     bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
-    text: "text-emerald-700 dark:text-emerald-400",
+    text: "text-emerald-600 dark:text-emerald-500",
     border: "border-emerald-500/30",
   },
   POST: {
     bg: "bg-blue-500/10 dark:bg-blue-500/20",
-    text: "text-blue-700 dark:text-blue-400",
+    text: "text-blue-600 dark:text-blue-500",
     border: "border-blue-500/30",
   },
   PUT: {
     bg: "bg-amber-500/10 dark:bg-amber-500/20",
-    text: "text-amber-700 dark:text-amber-400",
+    text: "text-amber-600 dark:text-amber-500",
     border: "border-amber-500/30",
   },
   DELETE: {
     bg: "bg-rose-500/10 dark:bg-rose-500/20",
-    text: "text-rose-700 dark:text-rose-400",
+    text: "text-rose-600 dark:text-rose-500",
     border: "border-rose-500/30",
   },
   PATCH: {
     bg: "bg-purple-500/10 dark:bg-purple-500/20",
-    text: "text-purple-700 dark:text-purple-400",
+    text: "text-purple-600 dark:text-purple-500",
     border: "border-purple-500/30",
   },
 };
@@ -241,7 +238,7 @@ export function DocsLayoutClient({
 
           {Object.entries(groupedEndpoints).map(([tagGroup, epList]) => (
             <div key={tagGroup} className="space-y-1">
-              <p className="px-2 pt-2 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+              <p className="px-2 pt-3 pb-1 text-xs font-semibold text-foreground/90">
                 {tagGroup}
               </p>
               {epList.map((ep) => {
@@ -260,23 +257,21 @@ export function DocsLayoutClient({
                     href={href}
                     onClick={onItemClick}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-all duration-150 border",
+                      "flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs transition-all duration-150 border",
                       isSelected
                         ? "bg-card border-primary/50 text-foreground font-medium shadow-xs ring-1 ring-primary/30"
                         : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
+                    <span className="truncate flex-1 text-[11.5px]">{ep.summary}</span>
                     <span
                       className={cn(
-                        "px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border shrink-0",
-                        color.bg,
+                        "text-[9.5px] font-bold uppercase tracking-wider shrink-0 font-mono transition-colors",
                         color.text,
-                        color.border,
                       )}
                     >
                       {ep.method}
                     </span>
-                    <span className="truncate flex-1 text-[11.5px]">{ep.summary}</span>
                   </Link>
                 );
               })}
@@ -304,7 +299,7 @@ export function DocsLayoutClient({
     <div className="flex min-h-screen bg-background text-foreground antialiased">
       {/* Desktop Left Fixed Sidebar */}
       {!isLandingPage && (
-        <aside className="hidden md:flex w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card/60 backdrop-blur-md flex-col h-screen sticky top-0 z-30">
+        <aside id="layout-sidebar" className="w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card/60 backdrop-blur-md flex-col h-screen sticky top-0 z-30">
           {renderSidebarContent()}
         </aside>
       )}
@@ -337,6 +332,10 @@ export function DocsLayoutClient({
               <>
                 <span className="text-muted-foreground/40 font-light text-xs hidden sm:inline">/</span>
                 <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground flex-wrap">
+                  {api.logoUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={api.logoUrl} alt={api.title} className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
+                  )}
                   <span className="text-foreground font-semibold">{api.title}</span>
                   {pathname === "/reference" ? (
                     activeEndpoint ? (
@@ -380,7 +379,7 @@ export function DocsLayoutClient({
                 className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/60 transition-colors"
                 aria-label="Toggle navigation menu"
               >
-                <PanelLeft className="h-5 w-5" />
+                <Menu className="h-5 w-5" />
               </button>
             )}
           </div>
@@ -396,4 +395,3 @@ export function DocsLayoutClient({
     </div>
   );
 }
-

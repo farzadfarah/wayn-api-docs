@@ -22,15 +22,15 @@ export function Sidebar({
   const getMethodBadgeColor = (method: string) => {
     switch (method.toUpperCase()) {
       case "POST":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-800";
+        return "text-blue-600 dark:text-blue-500";
       case "GET":
-        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
+        return "text-emerald-600 dark:text-emerald-500";
       case "PUT":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+        return "text-amber-600 dark:text-amber-500";
       case "DELETE":
-        return "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-200 dark:border-rose-800";
+        return "text-rose-600 dark:text-rose-500";
       default:
-        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+        return "text-slate-600 dark:text-slate-500";
     }
   };
 
@@ -95,7 +95,7 @@ export function Sidebar({
                   <span className="truncate font-medium">{endpoint.summary}</span>
                   <span
                     className={cn(
-                      "ml-2 shrink-0 rounded border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider",
+                      "ml-2 shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-wider transition-colors",
                       getMethodBadgeColor(endpoint.method),
                     )}
                   >

@@ -5,6 +5,8 @@ export type DocItem = {
   title: string;
   description: string;
   url: string;
+  category?: string;
+  logoUrl?: string;
 };
 
 type OpenApiOperation = {
@@ -144,6 +146,15 @@ function operationSummary(method: string, route: string, operation?: OpenApiOper
 }
 
 export async function getDocList(): Promise<DocItem[]> {
+  const localDocs: DocItem[] = [
+    // {
+    //   id: "openapi-yaml",
+    //   title: "🌌 Scalar Galaxy (Local Spec)",
+    //   description: "Local test OpenAPI specification from fumadocs-dev/examples/openapi/openapi.yaml.",
+    //   url: "fumadocs-dev/examples/openapi/openapi.yaml",
+    // },
+  ];
+
   try {
     const fetchUrl = `${INDEX_URL}?t=${Date.now()}`;
     const res = await fetch(fetchUrl, {
@@ -156,14 +167,27 @@ export async function getDocList(): Promise<DocItem[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        return data as DocItem[];
+        const flattened: DocItem[] = [];
+        for (const entry of data) {
+          if (entry && typeof entry === "object" && "items" in entry && Array.isArray(entry.items)) {
+            for (const item of entry.items) {
+              flattened.push({
+                ...item,
+                category: entry.category,
+              });
+            }
+          } else {
+            flattened.push(entry);
+          }
+        }
+        return [...localDocs, ...flattened];
       }
     }
   } catch (err) {
     console.error(`Failed to fetch index.json from ${INDEX_URL}:`, err);
   }
 
-  return [];
+  return localDocs;
 }
 
 export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
@@ -173,23 +197,36 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
   let source = "";
   const specUrl = currentDoc?.url ?? "";
 
-  if (currentDoc?.url && (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://"))) {
-    try {
-      const fetchUrl = currentDoc.url.includes("?")
-        ? `${currentDoc.url}&t=${Date.now()}`
-        : `${currentDoc.url}?t=${Date.now()}`;
-      const res = await fetch(fetchUrl, {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          Pragma: "no-cache",
-        },
-      });
-      if (res.ok) {
-        source = await res.text();
+  if (currentDoc?.url) {
+    if (currentDoc.url.startsWith("http://") || currentDoc.url.startsWith("https://")) {
+      try {
+        const fetchUrl = currentDoc.url.includes("?")
+          ? `${currentDoc.url}&t=${Date.now()}`
+          : `${currentDoc.url}?t=${Date.now()}`;
+        const res = await fetch(fetchUrl, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        });
+        if (res.ok) {
+          source = await res.text();
+        }
+      } catch (err) {
+        console.error(`Error fetching spec from ${currentDoc.url}:`, err);
       }
-    } catch (err) {
-      console.error(`Error fetching spec from ${currentDoc.url}:`, err);
+    } else {
+      if (typeof window === "undefined") {
+        try {
+          const fs = require(/*turbopackIgnore: true*/ "fs");
+          const path = require(/*turbopackIgnore: true*/ "path");
+          const filePath = path.join(process.cwd(), currentDoc.url);
+          source = fs.readFileSync(filePath, "utf-8");
+        } catch (err) {
+          console.error(`Error reading local file ${currentDoc.url}:`, err);
+        }
+      }
     }
   }
 
@@ -233,7 +270,7 @@ export async function getApiMetadata(docId?: string): Promise<ApiMetadata> {
     description,
     shortDescription,
     serverUrl,
-    logoUrl: docs.logoUrl,
+    logoUrl: docs.logoUrl || currentDoc?.logoUrl,
     endpoints,
     tags,
     authEndpoint,

@@ -1,12 +1,10 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { type ComponentProps, type ReactNode, useMemo, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
-import { ApiReferenceReact } from "@scalar/api-reference-react";
-import type { AnyApiReferenceConfiguration } from "@scalar/api-reference-react";
-import { parse, stringify } from "yaml";
-import { cn } from "@/lib/utils";
-import "@scalar/api-reference-react/style.css";
+import { parse } from "yaml";
+import { createOpenAPIPage } from "fumadocs-openapi/ui";
+import type { OperationItem, WebhookItem } from "fumadocs-openapi";
 
 function subscribeToTheme(callback: () => void) {
   const observer = new MutationObserver(callback);
@@ -22,8 +20,152 @@ function getThemeSnapshot() {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
+const OpenAPIPage = createOpenAPIPage({
+  content: {
+    renderPageLayout(slots) {
+      return (
+        <div className="flex flex-col gap-24 text-sm @container">
+          {slots.operations?.map((operation) => (
+            <section key={`${operation.item.method}:${operation.item.path}`} className="scroll-mt-20">
+              {operation.children}
+            </section>
+          ))}
+          {slots.webhooks?.map((webhook) => (
+            <section key={`${webhook.item.method}:${webhook.item.name}`} className="scroll-mt-20">
+              {webhook.children}
+            </section>
+          ))}
+        </div>
+      );
+    },
+    renderOperationLayout(slots) {
+      return (
+        <ResponsiveOperationLayout
+          side={slots.apiExample}
+          main={
+            <>
+              {slots.header}
+              {slots.apiPlayground}
+              {slots.description}
+              {slots.authSchemes}
+              {slots.parameters}
+              {slots.body}
+              {slots.responses}
+              {slots.callbacks}
+            </>
+          }
+        />
+      );
+    },
+    renderWebhookLayout(slots) {
+      return (
+        <ResponsiveOperationLayout
+          side={slots.requests}
+          main={
+            <>
+              {slots.header}
+              {slots.description}
+              {slots.authSchemes}
+              {slots.parameters}
+              {slots.body}
+              {slots.responses}
+              {slots.callbacks}
+            </>
+          }
+          reverseOnMobile
+        />
+      );
+    },
+  },
+});
+
+type OpenAPIPageBundledDocument = Extract<
+  ComponentProps<typeof OpenAPIPage>,
+  { payload: { bundled: unknown } }
+>["payload"]["bundled"];
+
+function ResponsiveOperationLayout({
+  main,
+  side,
+  reverseOnMobile = false,
+}: {
+  main: ReactNode;
+  side: ReactNode;
+  reverseOnMobile?: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "api-operation-grid grid min-w-0 gap-x-6 gap-y-4",
+        "grid-cols-1 @4xl:grid-cols-[minmax(0,1fr)_minmax(320px,400px)] @4xl:items-start",
+        reverseOnMobile ? "[&>.api-example-panel]:order-first @4xl:[&>.api-example-panel]:order-last" : "",
+      ].join(" ")}
+    >
+      <div className="min-w-0">{main}</div>
+      <aside className="api-example-panel min-w-0 @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)]">
+        {side}
+      </aside>
+    </div>
+  );
+}
+
+type JsonObject = Record<string, unknown>;
+
+const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "head", "options"] as const;
+type HttpMethod = (typeof HTTP_METHODS)[number];
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function cleanOpenApiSpec(obj: unknown): unknown {
+  if (!obj || typeof obj !== "object") {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(cleanOpenApiSpec);
+  }
+  const cleaned: JsonObject = {};
+  for (const [key, value] of Object.entries(obj)) {
+    let newKey = key;
+    if (typeof key === "string") {
+      const isMediaType =
+        key.startsWith("application/") ||
+        key.startsWith("text/") ||
+        key.startsWith("multipart/") ||
+        key.startsWith("image/") ||
+        key.startsWith("audio/") ||
+        key.startsWith("video/") ||
+        key.startsWith("model/") ||
+        key.startsWith("font/") ||
+        key === "*/*";
+
+      if (isMediaType) {
+        const lowerKey = key.trim().toLowerCase();
+        const supported = [
+          "application/json",
+          "application/x-www-form-urlencoded",
+          "multipart/form-data"
+        ];
+        if (!supported.includes(lowerKey)) {
+          if (lowerKey.includes("form")) {
+            newKey = "multipart/form-data";
+          } else {
+            newKey = "application/json";
+          }
+        }
+      }
+    }
+    cleaned[newKey] = cleanOpenApiSpec(value);
+  }
+  return cleaned;
+}
+
+function isHttpMethod(value: string): value is HttpMethod {
+  return (HTTP_METHODS as readonly string[]).includes(value.toLowerCase());
+}
+
 export function ApiReference({
-  specUrl = "",
   specContent = "",
 }: {
   specUrl?: string;
@@ -33,210 +175,90 @@ export function ApiReference({
   const searchParams = useSearchParams();
   const selectedEndpointKey = searchParams.get("endpoint");
 
-  const activeSpecContent = useMemo(() => {
-    if (!selectedEndpointKey || !specContent) {
-      return specContent;
-    }
+  const parsedDoc = useMemo(() => {
+    if (!specContent) return null;
     try {
-      const doc = parse(specContent);
-      if (doc && doc.paths) {
-        const [method, ...pathParts] = selectedEndpointKey.split("::");
-        const path = pathParts.join("::");
-        const targetPathObj = doc.paths[path];
-        if (targetPathObj) {
-          const lowerMethod = method.toLowerCase();
-          const targetOp = targetPathObj[lowerMethod];
-          if (targetOp) {
-            const singleOp = { ...targetOp };
-            delete singleOp.tags;
-            doc.paths = {
-              [path]: {
-                [lowerMethod]: singleOp,
-              },
-            };
-            delete doc.servers;
-            delete doc.tags;
-            if (doc.info) {
-              doc.info.title = singleOp.summary || path;
-              delete doc.info.description;
-            }
-            delete doc["x-docs"];
-            return stringify(doc);
+      const raw = parse(specContent);
+      return cleanOpenApiSpec(raw) as OpenAPIPageBundledDocument;
+    } catch (e) {
+      console.error("Error parsing spec content:", e);
+      return null;
+    }
+  }, [specContent]);
+
+  const activeOperations = useMemo(() => {
+    if (!parsedDoc || !isJsonObject(parsedDoc.paths)) return undefined;
+    if (!selectedEndpointKey) {
+      const ops: OperationItem[] = [];
+      for (const [path, pathItem] of Object.entries(parsedDoc.paths)) {
+        if (!isJsonObject(pathItem)) continue;
+        for (const method of Object.keys(pathItem)) {
+          if (isHttpMethod(method)) {
+            ops.push({
+              method: method.toLowerCase() as HttpMethod,
+              path: path,
+            });
           }
         }
       }
-    } catch (e) {
-      console.error("Error filtering spec content:", e);
+      return ops;
     }
-    return specContent;
-  }, [specContent, selectedEndpointKey]);
+    try {
+      const [method, ...pathParts] = selectedEndpointKey.split("::");
+      const path = pathParts.join("::");
+      if (!isHttpMethod(method) || !path) return undefined;
+      return [
+        {
+          method: method.toLowerCase() as HttpMethod,
+          path: path,
+        },
+      ];
+    } catch {
+      return undefined;
+    }
+  }, [parsedDoc, selectedEndpointKey]);
 
-  // When an endpoint is selected, do not pass `url` so Scalar only uses our filtered spec content
-  const scalarUrl = selectedEndpointKey ? undefined : specUrl;
+  const activeWebhooks = useMemo(() => {
+    if (!parsedDoc || !isJsonObject(parsedDoc.webhooks)) return undefined;
+    if (!selectedEndpointKey) {
+      const hooks: WebhookItem[] = [];
+      for (const [name, pathItem] of Object.entries(parsedDoc.webhooks)) {
+        if (!isJsonObject(pathItem)) continue;
+        for (const method of Object.keys(pathItem)) {
+          if (isHttpMethod(method)) {
+            hooks.push({
+              method: method.toLowerCase() as HttpMethod,
+              name: name,
+            });
+          }
+        }
+      }
+      return hooks;
+    }
+    return undefined;
+  }, [parsedDoc, selectedEndpointKey]);
 
-  const endpointSpecificCss = selectedEndpointKey
-    ? `
-      .scalar-app [class*="introduction"],
-      .scalar-app [class*="server"],
-      .scalar-app [class*="download"],
-      .scalar-app [class*="tag-header"],
-      .scalar-app [class*="tag-section"],
-      .scalar-app [class*="operations-overview"],
-      .scalar-app [class*="operations-list"],
-      .scalar-app [class*="operations_"],
-      .scalar-app [class*="operations-"],
-      .scalar-app [class*="section-header"] {
-        display: none !important;
-      }
-    `
-    : "";
-
-  const scalarConfiguration: AnyApiReferenceConfiguration = {
-    url: scalarUrl,
-    spec: activeSpecContent ? { content: activeSpecContent } : scalarUrl ? { url: scalarUrl } : undefined,
-    content: activeSpecContent || undefined,
-    darkMode: colorMode === "dark",
-    forceDarkModeState: colorMode === "dark" ? "dark" : "light",
-    hideModels: true,
-    hideSearch: true,
-    hideClientButton: true,
-    showSidebar: false,
-    showDeveloperTools: "localhost",
-    theme: "none",
-    customCss: `
-      .scalar-app {
-        --scalar-radius: 8px !important;
-        --scalar-sidebar-width: 0px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-      }
-      .scalar-app [class*="sidebar"] {
-        display: none !important;
-        width: 0 !important;
-      }
-      .scalar-app [class*="references-rendered"],
-      .scalar-app [class*="references-layout"],
-      .scalar-app main,
-      .scalar-app [class*="section-content"],
-      .scalar-app [class*="narrow-references"],
-      .scalar-app [class*="page-content"],
-      .scalar-app [class*="content-wrapper"] {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding-left: 0 !important;
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-
-      /* Fumadocs Structure Alignment: Separate Path and Language Selector */
-      /* Hide duplicate path/method inside code block headers so header is dedicated purely to Language Selection */
-      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="endpoint"],
-      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="path"],
-      .scalar-app [class*="request-card"] [class*="scalar-card-header"] [class*="url"],
-      .scalar-app [class*="code-snippet"] [class*="path"],
-      .scalar-app [class*="code-header"] [class*="path"],
-      .scalar-app [class*="code-header"] [class*="url"],
-      .scalar-app [class*="request-header"] [class*="path"],
-      .scalar-app [class*="request-header"] [class*="url"],
-      .scalar-app [class*="request"] [class*="header"] > div:first-child:not([class*="client"]),
-      .scalar-app [class*="code-header"] > div:first-child:not([class*="client"]) {
-        display: none !important;
-      }
-
-      /* Style code card header as a clean dedicated Language Selector Bar like Fumadocs */
-      .scalar-app [class*="code-header"],
-      .scalar-app [class*="request-header"],
-      .scalar-app [class*="snippet-header"],
-      .scalar-app [class*="request-card"] [class*="scalar-card-header"] {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        padding: 8px 14px !important;
-        border-bottom: 1px solid var(--scalar-border-color, var(--border)) !important;
-        background-color: var(--scalar-background-2, var(--muted)) !important;
-        min-height: 40px !important;
-      }
-
-      .scalar-app [class*="client-picker"],
-      .scalar-app [class*="language-picker"],
-      .scalar-app [class*="client-libraries"] {
-        margin-left: 0 !important;
-        flex-shrink: 0 !important;
-      }
-
-      /* Prevent popover dropdowns from inheriting structural width/margin overrides */
-      .scalar-app [class*="popover"],
-      .scalar-app [class*="dropdown"],
-      .scalar-app [class*="floating"],
-      .scalar-app [class*="select-content"],
-      .scalar-app [class*="picker-content"],
-      .scalar-app [role="menu"],
-      .scalar-app [role="listbox"],
-      .scalar-app [data-radix-popper-content-wrapper] {
-        width: auto !important;
-        max-width: 320px !important;
-        margin: 0 !important;
-        z-index: 1000 !important;
-      }
-      .scalar-app .operation-auth {
-        margin-bottom: 0 !important;
-      }
-      .scalar-app .operation-title {
-        margin-bottom: 0 !important;
-      }
-      .scalar-app .operation-description:has(> .markdown:empty) {
-        margin-bottom: 0 !important;
-      }
-      .scalar-app .operation-description > .markdown:empty {
-        display: none !important;
-      }
-      ${endpointSpecificCss}
-    `,
-    persistAuth: false,
-    proxyUrl: "https://proxy.scalar.com",
-    externalUrls: {
-      dashboardUrl: "https://dashboard.scalar.com",
-      registryUrl: "https://registry.scalar.com",
-      proxyUrl: "https://proxy.scalar.com",
-      apiBaseUrl: "https://api.scalar.com",
-    },
-    default: false,
-    layout: "modern",
-    isEditable: false,
-    documentDownloadType: selectedEndpointKey ? "none" : "both",
-    hideTestRequestButton: false,
-    showOperationId: false,
-    hideDarkModeToggle: true,
-    withDefaultFonts: true,
-    defaultOpenFirstTag: true,
-    defaultOpenAllTags: true,
-    expandAllModelSections: false,
-    expandAllResponses: false,
-    expandAllSchemaProperties: false,
-    orderSchemaPropertiesBy: "alpha",
-    orderRequiredPropertiesFirst: true,
-    _integration: "react",
-    hideDownloadButton: !!selectedEndpointKey,
-    defaultHttpClient: {
-      targetKey: "node",
-      clientKey: "fetch",
-    },
-    modelsSectionLabel: "Models",
-  };
+  if (!parsedDoc) {
+    return (
+      <div className="h-96 rounded-xl border border-border bg-card animate-pulse flex items-center justify-center text-muted-foreground text-sm">
+        Loading API Reference...
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full rounded-xl border border-border bg-card shadow-sm">
-      <div
-        className={cn(
-          "scalar-app w-full transition-colors duration-200",
-          colorMode === "dark" ? "dark-mode" : "light-mode",
-        )}
-      >
-        <ApiReferenceReact
-          key={`${colorMode}-${selectedEndpointKey}-${activeSpecContent.length}`}
-          configuration={scalarConfiguration}
-        />
-      </div>
+    <div className="reference-openapi w-full min-w-0 not-prose">
+      <OpenAPIPage
+        key={`${selectedEndpointKey}-${colorMode}`}
+        document="api-spec"
+        operations={activeOperations}
+        webhooks={activeWebhooks}
+        showTitle={!selectedEndpointKey}
+        showDescription
+        payload={{
+          bundled: parsedDoc,
+        }}
+      />
     </div>
   );
 }
