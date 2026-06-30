@@ -257,6 +257,7 @@ export function ApiReference({
         showDescription
         payload={{
           bundled: parsedDoc,
+          proxyUrl: "/api/proxy",
         }}
       />
     </div>
