@@ -324,18 +324,21 @@ export function DocsLayoutClient({
         {/* Top Header Bar */}
         <header className="h-14 shrink-0 border-b border-border/60 bg-card/40 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-20">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/" className="flex items-center gap-2 font-bold text-base hover:opacity-90 transition-opacity shrink-0">
+            <Link 
+              href={!isLandingPage ? `/docs/overview?doc=${api.docId}` : "/"} 
+              className="flex items-center gap-2 font-bold text-base hover:opacity-90 transition-opacity shrink-0"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mainLogoUrl} alt="7x" className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
+              <img 
+                src={(!isLandingPage && api.logoUrl) ? api.logoUrl : mainLogoUrl} 
+                alt={(!isLandingPage && api.title) ? api.title : "7x"} 
+                className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" 
+              />
             </Link>
             {!isLandingPage && (
               <>
                 <span className="text-muted-foreground/40 font-light text-xs hidden sm:inline">/</span>
                 <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground flex-wrap">
-                  {api.logoUrl && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={api.logoUrl} alt={api.title} className="h-6 w-auto object-contain bg-foreground/10 p-1 rounded" />
-                  )}
                   <span className="text-foreground font-semibold">{api.title}</span>
                   {pathname === "/reference" ? (
                     activeEndpoint ? (
