@@ -1,9 +1,10 @@
 "use client";
 
-import { type ComponentProps, type ReactNode, useMemo, useSyncExternalStore } from "react";
+import { type ComponentProps, type ReactNode, useMemo, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import { parse } from "yaml";
 import { createOpenAPIPage } from "fumadocs-openapi/ui";
+import { DefaultCollapsiblePanel } from "fumadocs-openapi/playground/client";
 import type { OperationItem, WebhookItem } from "fumadocs-openapi";
 
 function subscribeToTheme(callback: () => void) {
@@ -21,6 +22,11 @@ function getThemeSnapshot() {
 }
 
 const OpenAPIPage = createOpenAPIPage({
+  playground: {
+    components: {
+      CollapsiblePanel: ExpandedCollapsiblePanel,
+    },
+  },
   content: {
     renderPageLayout(slots) {
       return (
@@ -41,11 +47,12 @@ const OpenAPIPage = createOpenAPIPage({
     renderOperationLayout(slots) {
       return (
         <ResponsiveOperationLayout
-          side={slots.apiExample}
+          side={null}
           main={
             <>
               {slots.header}
               {slots.apiPlayground}
+              {slots.apiExample}
               {slots.description}
               {slots.authSchemes}
               {slots.parameters}
@@ -79,6 +86,26 @@ const OpenAPIPage = createOpenAPIPage({
   },
 });
 
+function ExpandedCollapsiblePanel({
+  open,
+  onOpenChange,
+  defaultOpen = true,
+  ...props
+}: ComponentProps<typeof DefaultCollapsiblePanel>) {
+  const [isOpen, setIsOpen] = useState(open || defaultOpen);
+
+  return (
+    <DefaultCollapsiblePanel
+      {...props}
+      open={isOpen}
+      onOpenChange={(nextOpen) => {
+        setIsOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+      }}
+    />
+  );
+}
+
 type OpenAPIPageBundledDocument = Extract<
   ComponentProps<typeof OpenAPIPage>,
   { payload: { bundled: unknown } }
@@ -102,9 +129,11 @@ function ResponsiveOperationLayout({
       ].join(" ")}
     >
       <div className="min-w-0">{main}</div>
-      <aside className="api-example-panel min-w-0 @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)]">
-        {side}
-      </aside>
+      {side ? (
+        <aside className="api-example-panel min-w-0 @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)]">
+          {side}
+        </aside>
+      ) : null}
     </div>
   );
 }
