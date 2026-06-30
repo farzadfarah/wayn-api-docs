@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Code2, BookOpen, Layers, ChevronDown } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { DocsOverviewSection, ApiEndpoint, DocItem } from "@/lib/openapi";
 
@@ -133,9 +132,6 @@ export function NavbarClient({
           </Link>
         </nav>
 
-        <div className="ml-auto md:ml-0 flex items-center gap-2">
-          <ThemeToggle className="bg-white/10 hover:bg-white/20 text-white hover:text-white border border-white/10" />
-        </div>
       </div>
     </header>
   );

@@ -14,7 +14,6 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { ApiMetadata, ApiEndpoint } from "@/lib/openapi";
 
@@ -109,7 +108,7 @@ export function DocsLayoutClient({
           ep.method.toUpperCase() === normMethod &&
           ep.path.toLowerCase().replace(/\/$/, "") === normPath,
       );
-    } catch (e) {
+    } catch {
       return null;
     }
   }, [activeEndpoint, api.endpoints]);
@@ -294,7 +293,6 @@ export function DocsLayoutClient({
           <Layers className="h-3.5 w-3.5" />
           Doc Hub
         </Link>
-        <ThemeToggle />
       </div>
     </>
   );
@@ -378,7 +376,6 @@ export function DocsLayoutClient({
                 {api.version || "v1"}
               </span>
             )}
-            <ThemeToggle />
             {!isLandingPage && (
               <button
                 type="button"

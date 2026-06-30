@@ -9,6 +9,13 @@ export function Provider({ children }: { children: ReactNode }) {
       search={{
         enabled: true,
       }}
+      theme={{
+        attribute: "class",
+        defaultTheme: "dark",
+        forcedTheme: "dark",
+        enableSystem: false,
+        disableTransitionOnChange: true,
+      }}
     >
       {children}
     </RootProvider>

@@ -47,12 +47,11 @@ const OpenAPIPage = createOpenAPIPage({
     renderOperationLayout(slots) {
       return (
         <ResponsiveOperationLayout
-          side={null}
+          side={slots.apiExample}
           main={
             <>
               {slots.header}
               {slots.apiPlayground}
-              {slots.apiExample}
               {slots.description}
               {slots.authSchemes}
               {slots.parameters}
