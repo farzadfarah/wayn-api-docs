@@ -138,11 +138,23 @@ function firstParagraph(value?: string) {
   );
 }
 
+function toPascalCaseText(value: string) {
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .split(/[\s_\-/]+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (/^[A-Z0-9]+$/.test(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
 function operationSummary(method: string, route: string, operation?: OpenApiOperation) {
-  return (
+  return toPascalCaseText(
     operation?.summary ||
     operation?.operationId ||
-    `${method.toUpperCase()} ${route}`
+    `${method.toUpperCase()} ${route}`,
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -64,6 +64,31 @@ export function DocsLayoutClient({
   const docQuery = `?doc=${activeDocId}`;
   const mainLogoUrl = "https://stapps.blob.core.windows.net/cn-epgcms-stg/assets/logo_trademark_72e0639f5d.svg";
 
+  useEffect(() => {
+    document.documentElement.classList.add("docs-shell-lock-scroll");
+    document.body.classList.add("docs-shell-lock-scroll");
+    window.scrollTo(0, 0);
+
+    const sidebar = document.getElementById("layout-sidebar");
+    const handleNativeSidebarWheel = (event: WheelEvent) => {
+      const nav = sidebar?.querySelector("nav");
+      if (!sidebar?.contains(event.target as Node) || !nav) return;
+
+      nav.scrollTop += event.deltaY;
+      event.preventDefault();
+      event.stopPropagation();
+      window.scrollTo(0, 0);
+    };
+
+    sidebar?.addEventListener("wheel", handleNativeSidebarWheel, { passive: false });
+
+    return () => {
+      sidebar?.removeEventListener("wheel", handleNativeSidebarWheel);
+      document.documentElement.classList.remove("docs-shell-lock-scroll");
+      document.body.classList.remove("docs-shell-lock-scroll");
+    };
+  }, []);
+
   const handleDocChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     if (selectedId === "hub") {
@@ -71,6 +96,16 @@ export function DocsLayoutClient({
     } else {
       router.push(`${pathname === "/" ? "/docs/overview" : pathname}?doc=${selectedId}`);
     }
+  };
+
+  const handleSidebarWheel = (event: React.WheelEvent<HTMLElement>) => {
+    const nav = event.currentTarget.querySelector("nav");
+    if (!nav) return;
+
+    nav.scrollTop += event.deltaY;
+    event.preventDefault();
+    event.stopPropagation();
+    window.scrollTo(0, 0);
   };
 
   const filteredEndpoints = useMemo(() => {
@@ -187,7 +222,7 @@ export function DocsLayoutClient({
       </div>
 
       {/* Navigation Content */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
         {/* Guides Section */}
         <div className="space-y-1">
           <p className="px-2 pb-1 text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider">
@@ -284,7 +319,7 @@ export function DocsLayoutClient({
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border/60 flex items-center justify-between bg-muted/30">
+      <div className="mt-auto shrink-0 p-3 border-t border-border/60 flex items-center justify-between bg-muted/30">
         <Link
           href="/"
           onClick={onItemClick}
@@ -298,10 +333,14 @@ export function DocsLayoutClient({
   );
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground antialiased">
+    <div className="flex h-dvh min-h-dvh overflow-hidden bg-background text-foreground antialiased">
       {/* Desktop Left Fixed Sidebar */}
       {!isLandingPage && (
-        <aside id="layout-sidebar" className="w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card/60 backdrop-blur-md flex-col h-screen sticky top-0 z-30">
+        <aside
+          id="layout-sidebar"
+          className="w-64 lg:w-72 shrink-0 border-r border-border/70 bg-card flex-col h-dvh min-h-dvh sticky top-0 z-30 overflow-hidden"
+          onWheel={handleSidebarWheel}
+        >
           {renderSidebarContent()}
         </aside>
       )}
@@ -322,7 +361,7 @@ export function DocsLayoutClient({
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-hidden">
         {/* Top Header Bar */}
         <header className="h-14 shrink-0 border-b border-border/60 bg-card/40 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-20">
           <div className="flex items-center gap-3 min-w-0">

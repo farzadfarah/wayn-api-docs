@@ -6,6 +6,7 @@ import { parse } from "yaml";
 import { createOpenAPIPage } from "fumadocs-openapi/ui";
 import { DefaultCollapsiblePanel } from "fumadocs-openapi/playground/client";
 import type { OperationItem, WebhookItem } from "fumadocs-openapi";
+import { ChevronDown, Info } from "lucide-react";
 
 function subscribeToTheme(callback: () => void) {
   const observer = new MutationObserver(callback);
@@ -46,40 +47,54 @@ const OpenAPIPage = createOpenAPIPage({
     },
     renderOperationLayout(slots) {
       return (
-        <ResponsiveOperationLayout
-          side={slots.apiExample}
-          main={
-            <>
-              {slots.header}
-              {slots.apiPlayground}
-              {slots.description}
-              {slots.authSchemes}
-              {slots.parameters}
-              {slots.body}
-              {slots.responses}
-              {slots.callbacks}
-            </>
-          }
-        />
+        <>
+          <EndpointDescriptionLayout>
+            <EndpointDescription>{slots.description}</EndpointDescription>
+          </EndpointDescriptionLayout>
+          <ResponsiveOperationLayout
+            side={slots.apiExample}
+            main={
+              <>
+                <ApiSection title="Request builder" tone="primary" className="api-request-builder">
+                  {slots.header}
+                  {slots.apiPlayground}
+                </ApiSection>
+                <ApiSection title="Reference details">
+                  {slots.authSchemes}
+                  {slots.parameters}
+                  {slots.body}
+                  {slots.responses}
+                  {slots.callbacks}
+                </ApiSection>
+              </>
+            }
+          />
+        </>
       );
     },
     renderWebhookLayout(slots) {
       return (
-        <ResponsiveOperationLayout
-          side={slots.requests}
-          main={
-            <>
-              {slots.header}
-              {slots.description}
-              {slots.authSchemes}
-              {slots.parameters}
-              {slots.body}
-              {slots.responses}
-              {slots.callbacks}
-            </>
-          }
-          reverseOnMobile
-        />
+        <>
+          <EndpointDescription>{slots.description}</EndpointDescription>
+          <ResponsiveOperationLayout
+            side={slots.requests}
+            main={
+              <>
+                <ApiSection title="Webhook">
+                  {slots.header}
+                </ApiSection>
+                <ApiSection title="Reference details">
+                  {slots.authSchemes}
+                  {slots.parameters}
+                  {slots.body}
+                  {slots.responses}
+                  {slots.callbacks}
+                </ApiSection>
+              </>
+            }
+            reverseOnMobile
+          />
+        </>
       );
     },
   },
@@ -102,6 +117,74 @@ function ExpandedCollapsiblePanel({
         onOpenChange?.(nextOpen);
       }}
     />
+  );
+}
+
+function ApiSection({
+  className = "",
+  children,
+  title,
+  tone = "neutral",
+}: {
+  className?: string;
+  children: ReactNode;
+  title: string;
+  tone?: "neutral" | "primary";
+}) {
+  if (!children) return null;
+
+  return (
+    <details className={`group mb-5 overflow-hidden rounded-md border border-border bg-card shadow-sm ${className}`} open>
+      <summary
+        className={[
+          "flex cursor-pointer list-none items-center justify-between gap-3 border-b px-4 py-2.5 text-xs font-bold uppercase tracking-wide [&::-webkit-details-marker]:hidden",
+          tone === "primary"
+            ? "border-teal-500/20 bg-teal-50 text-teal-800 dark:border-cyan-400/20 dark:bg-cyan-950/25 dark:text-cyan-200"
+            : "border-indigo-500/20 bg-indigo-50 text-indigo-800 dark:border-violet-400/20 dark:bg-violet-950/30 dark:text-violet-200",
+        ].join(" ")}
+      >
+        <span>{title}</span>
+        <ChevronDown
+          className="size-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <div className="min-w-0 p-3 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{children}</div>
+    </details>
+  );
+}
+
+function EndpointDescriptionLayout({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className={[
+        "api-operation-grid grid min-w-0 gap-x-6 gap-y-4",
+        "grid-cols-1 @4xl:grid-cols-[minmax(0,1fr)_minmax(320px,400px)] @4xl:items-start",
+      ].join(" ")}
+    >
+      <div className="min-w-0">{children}</div>
+      <div className="hidden @4xl:block" aria-hidden="true" />
+    </div>
+  );
+}
+
+function EndpointDescription({ children }: { children: ReactNode }) {
+  if (!children) return null;
+
+  return (
+    <section className="mb-5 overflow-hidden rounded-md border border-teal-500/30 bg-card text-foreground shadow-sm ring-1 ring-teal-500/10 dark:border-cyan-400/30 dark:ring-cyan-400/10">
+      <div className="flex items-center gap-2 border-b border-teal-500/20 bg-teal-50 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-teal-800 dark:border-cyan-400/20 dark:bg-cyan-950/25 dark:text-cyan-200">
+        <Info className="size-4 shrink-0" aria-hidden="true" />
+        <span>Overview</span>
+      </div>
+      <div className="bg-teal-50/45 px-4 py-3.5 dark:bg-cyan-950/15">
+        <div className="border-l-4 border-teal-600 pl-3 dark:border-cyan-300">
+          <div className="text-[0.9375rem] font-semibold leading-6 text-teal-950 dark:text-cyan-50 [&_p]:m-0 [&_p]:text-current">
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -146,6 +229,18 @@ function isJsonObject(value: unknown): value is JsonObject {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function toPascalCaseText(value: string) {
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .split(/[\s_\-/]+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (/^[A-Z0-9]+$/.test(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
 function cleanOpenApiSpec(obj: unknown): unknown {
   if (!obj || typeof obj !== "object") {
     return obj;
@@ -156,6 +251,7 @@ function cleanOpenApiSpec(obj: unknown): unknown {
   const cleaned: JsonObject = {};
   for (const [key, value] of Object.entries(obj)) {
     let newKey = key;
+    let newValue = value;
     if (typeof key === "string") {
       const isMediaType =
         key.startsWith("application/") ||
@@ -183,8 +279,12 @@ function cleanOpenApiSpec(obj: unknown): unknown {
           }
         }
       }
+
+      if (key === "summary" && typeof value === "string") {
+        newValue = toPascalCaseText(value);
+      }
     }
-    cleaned[newKey] = cleanOpenApiSpec(value);
+    cleaned[newKey] = cleanOpenApiSpec(newValue);
   }
   return cleaned;
 }
